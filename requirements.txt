@@ -15,3 +15,4 @@ python-docx==1.1.0
 xlsxwriter==3.1.9
 pikepdf==8.10.1
 cairosvg==2.7.1
+gunicorn==21.2.0

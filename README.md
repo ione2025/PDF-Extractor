@@ -2,25 +2,41 @@
 
 **The Most Powerful PDF Tool Ever Created** - A sophisticated web application for extracting text and images from PDF files with AI-powered analysis, OCR scanning, and automated Excel reporting.
 
-**✨ Production-Ready Web Application** - Deploy anywhere, access from any browser!
+**✨ Get Your Own Live Website in 2 Minutes!**
+
+[![Deploy to Render](https://render.com/images/deploy-to-render-button.svg)](https://render.com/deploy?repo=https://github.com/ione2025/PDF-Extractor)
+[![Deploy on Railway](https://railway.app/button.svg)](https://railway.app/template/6JwSne?referralCode=alphasec)
+
+**🌐 [Click Here for Live Deployment Guide](DEPLOY_LIVE.md)** - Get your own website URL with one click!
 
 ![PDF Extractor Pro](https://github.com/user-attachments/assets/24da9158-c6f0-4033-9065-d994063d12ce)
 
-## 🌐 Quick Start - Web Application
+## 🎯 Choose Your Experience
 
-Run PDF Extractor Pro as a web service:
+### Option 1: Get a Live Website (Recommended) 🌟
+
+**No installation needed! Get a live URL like `https://your-app.onrender.com`**
+
+1. Click a deploy button above
+2. Sign in with GitHub (free)
+3. Wait 5 minutes
+4. Get your live website URL!
+
+**📖 See [DEPLOY_LIVE.md](DEPLOY_LIVE.md) for step-by-step instructions**
+
+### Option 2: Run Locally
+
+If you want to run on your computer:
 
 ```bash
 # Install dependencies
 pip install -r requirements.txt
 
-# Run as web application
+# Run the application
 python app.py
 ```
 
-Open your browser to **http://localhost:5000** and start extracting!
-
-**📖 See [DEPLOYMENT.md](DEPLOYMENT.md) for production deployment options (Heroku, AWS, Docker, etc.)**
+Open your browser to **http://localhost:5000**
 
 The application will automatically open in your browser at `http://localhost:5000`
 
