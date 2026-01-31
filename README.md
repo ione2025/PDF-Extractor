@@ -1,10 +1,20 @@
 # 🚀 PDF Extractor Pro
 
-**The Most Powerful PDF Tool Ever Created** - A sophisticated web application for extracting text and images from PDF files with AI-powered analysis, OCR scanning, and automated Excel reporting.
+**The Most Powerful PDF Tool Ever Created** - A sophisticated desktop and web application for extracting text and images from PDF files with AI-powered analysis, OCR scanning, and automated Excel reporting.
+
+**NEW**: Adobe Acrobat Pro DC-style interface with Windows executable installer!
 
 ![PDF Extractor Pro](https://github.com/user-attachments/assets/6a3999fe-142c-43b0-9e3f-ecfb401e8ce1)
 
 ## ✨ Features
+
+### 🎨 Professional Adobe-Style Interface
+- **Adobe Acrobat Pro DC Design**: Modern dark theme matching Adobe's professional tools
+- **Sidebar Navigation**: Quick access tools panel with extraction and analysis options
+- **Top Toolbar**: Primary actions for opening files and exporting results
+- **Properties Panel**: Contextual options and settings
+- **Status Bar**: Real-time feedback on operations
+- **Responsive Layout**: Adapts to any screen size
 
 ### 📝 Text Extraction with Multi-language OCR
 - **Dual Extraction Methods**: Choose between PDFPlumber (recommended) and PyPDF2
@@ -36,23 +46,38 @@
 - **Error Recovery**: Robust error handling with automatic cleanup
 - **Security**: File validation, secure filename handling, automatic file deletion
 - **Responsive Design**: Works flawlessly on desktop, tablet, and mobile
-
-### 🎨 Modern UI/UX
-- **Sleek Dark Theme**: Professional design inspired by huly.io
-- **Smooth Animations**: Polished micro-interactions and transitions
-- **Card-Based Layout**: Clean, organized interface with subtle shadows
-- **Custom Scrollbars**: Styled scrollbars for better aesthetics
-- **Accessibility**: Focus indicators and keyboard navigation support
-
-## 🖥️ Screenshots
-
-### Text Extraction Mode
-![Text Extraction](https://github.com/user-attachments/assets/6a3999fe-142c-43b0-9e3f-ecfb401e8ce1)
-
-### AI Image Analysis Mode
-![AI Image Analysis](https://github.com/user-attachments/assets/910ce6ca-402c-4a2b-94da-43f81ec9b9a7)
+- **Desktop Application**: Available as Windows executable with installer
 
 ## 📦 Installation
+
+### Option 1: Windows Executable (Recommended for Windows Users)
+
+**Download and install the standalone application:**
+
+1. **Build the executable** (or download pre-built release):
+   ```cmd
+   build.bat
+   ```
+
+2. **Run the installer**:
+   - Execute `installer/PDF_Extractor_Pro_Setup.exe`
+   - Follow the installation wizard
+   - Application installs to `C:\Program Files\PDF Extractor Pro\`
+   - Desktop shortcut created automatically
+
+3. **Launch the application**:
+   - Double-click the desktop shortcut or Start Menu icon
+   - Application opens automatically in your default browser
+   - Access at `http://localhost:5000`
+
+**Build Requirements**:
+- Python 3.7+ with all dependencies installed
+- PyInstaller (`pip install pyinstaller`)
+- Inno Setup (optional, for creating installer)
+
+See [BUILD.md](BUILD.md) for detailed build instructions.
+
+### Option 2: Python Installation (Cross-Platform)
 
 ### Prerequisites
 
