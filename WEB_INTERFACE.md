@@ -8,26 +8,31 @@ PDF Extractor Pro features a professional Adobe Acrobat-style web interface that
 
 ## 🚀 Quick Start
 
-### Starting the Web Interface
+### Starting the Web Application
 
-**Option 1: Using the Launcher (Recommended)**
-```bash
-python launcher.py
-```
-This will:
-- Start the Flask web server
-- Automatically open your default browser
-- Navigate to http://localhost:5000
-
-**Option 2: Direct Flask Start**
+**Simple Start (Recommended)**
 ```bash
 python app.py
 ```
-Then manually open your browser and go to: http://localhost:5000
+Then open your browser to: **http://localhost:5000**
 
-**Option 3: Windows Executable**
-- Double-click the desktop shortcut after installation
-- Or launch from Start Menu: "PDF Extractor Pro"
+**With Custom Port**
+```bash
+export PORT=8080
+python app.py
+```
+Then open your browser to: **http://localhost:8080**
+
+**Production Deployment**
+```bash
+# Install Gunicorn
+pip install gunicorn
+
+# Run with Gunicorn
+gunicorn -w 4 -b 0.0.0.0:5000 wsgi:app
+```
+
+See [DEPLOYMENT.md](DEPLOYMENT.md) for more deployment options.
 
 ## 🎨 Interface Overview
 

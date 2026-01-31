@@ -1,22 +1,26 @@
 # 🚀 PDF Extractor Pro
 
-**The Most Powerful PDF Tool Ever Created** - A sophisticated desktop and web application for extracting text and images from PDF files with AI-powered analysis, OCR scanning, and automated Excel reporting.
+**The Most Powerful PDF Tool Ever Created** - A sophisticated web application for extracting text and images from PDF files with AI-powered analysis, OCR scanning, and automated Excel reporting.
 
-**✨ NEW**: Production-ready web interface with Adobe Acrobat Pro DC-style design!
+**✨ Production-Ready Web Application** - Deploy anywhere, access from any browser!
 
 ![PDF Extractor Pro](https://github.com/user-attachments/assets/24da9158-c6f0-4033-9065-d994063d12ce)
 
-## 🌐 Quick Start - Web Interface
+## 🌐 Quick Start - Web Application
 
-The easiest way to use PDF Extractor Pro is through the web interface:
+Run PDF Extractor Pro as a web service:
 
 ```bash
 # Install dependencies
 pip install -r requirements.txt
 
-# Start the web application
-python launcher.py
+# Run as web application
+python app.py
 ```
+
+Open your browser to **http://localhost:5000** and start extracting!
+
+**📖 See [DEPLOYMENT.md](DEPLOYMENT.md) for production deployment options (Heroku, AWS, Docker, etc.)**
 
 The application will automatically open in your browser at `http://localhost:5000`
 
