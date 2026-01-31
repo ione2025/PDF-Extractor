@@ -56,3 +56,14 @@ output/
 .pytest_cache/
 .coverage
 htmlcov/
+
+# Build artifacts
+build/
+dist/
+installer/
+*.spec.backup
+*.css.backup
+
+# PyInstaller
+*.pyc
+__pycache__/

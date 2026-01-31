@@ -3,171 +3,328 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PDF Extractor Pro - Most Powerful PDF Tool</title>
+    <title>PDF Extractor Pro</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
 </head>
 <body>
-    <div class="container">
-        <header>
-            <h1>🚀 PDF Extractor Pro</h1>
-            <p class="subtitle">The Most Powerful PDF Tool - Extract text, images, OCR scan, and AI-powered analysis</p>
-        </header>
-
-        <div class="upload-section">
-            <div class="mode-selector">
-                <label>Extraction Mode:</label>
-                <div class="mode-tabs">
-                    <button class="mode-tab active" data-mode="text">
-                        📝 Text Extraction + OCR
-                    </button>
-                    <button class="mode-tab" data-mode="images">
-                        🖼️ AI Image Analysis + Excel
-                    </button>
-                </div>
-            </div>
-
-            <form id="upload-form" enctype="multipart/form-data">
-                <div class="file-input-wrapper">
-                    <input type="file" id="pdf-file" name="file" accept=".pdf" required>
-                    <label for="pdf-file" class="file-label">
-                        <span class="file-icon">📁</span>
-                        <span class="file-text">Choose PDF File</span>
-                    </label>
-                </div>
-
-                <!-- Text Extraction Options -->
-                <div id="text-options" class="method-selector">
-                    <label>Text Extraction Method:</label>
-                    <div class="radio-group">
-                        <label class="radio-label">
-                            <input type="radio" name="method" value="pdfplumber" checked>
-                            <span>PDFPlumber (Recommended)</span>
-                        </label>
-                        <label class="radio-label">
-                            <input type="radio" name="method" value="pypdf2">
-                            <span>PyPDF2</span>
-                        </label>
-                    </div>
-                    <div class="ocr-option">
-                        <label class="checkbox-label">
-                            <input type="checkbox" name="use_ocr" checked>
-                            <span>🔍 Enable Automatic OCR (Multi-language)</span>
-                        </label>
-                        <p class="help-text">OCR supports English, Arabic, Chinese Traditional & Simplified</p>
-                    </div>
-                </div>
-
-                <!-- Image Extraction Info -->
-                <div id="image-options" class="method-selector" style="display: none;">
-                    <div class="info-box">
-                        <h3>🤖 AI-Powered Image Extraction & Analysis</h3>
-                        <p><strong>This mode will:</strong></p>
-                        <ul>
-                            <li>✅ Extract Ultra-HD images (300-400 DPI)</li>
-                            <li>✅ AI analysis with Gemini 1.5 Flash for SKU detection</li>
-                            <li>✅ Categorize products automatically</li>
-                            <li>✅ Extract product descriptions</li>
-                            <li>✅ Generate SVG paths for 3D modeling</li>
-                            <li>✅ Detect primary and secondary colors</li>
-                            <li>✅ Save as WebP with organized folders</li>
-                            <li>✅ Create Excel report with all SKUs</li>
-                            <li>✅ Real-time progress tracking</li>
-                        </ul>
-                    </div>
-                </div>
-
-                <button type="submit" class="extract-btn" id="extract-btn">
-                    <span class="btn-text">Extract</span>
-                </button>
-            </form>
-
-            <!-- Progress Bar -->
-            <div id="progress-container" class="progress-container" style="display: none;">
-                <div class="progress-header">
-                    <span id="progress-message">Processing...</span>
-                    <span id="progress-percentage">0%</span>
-                </div>
-                <div class="progress-bar">
-                    <div class="progress-fill" id="progress-fill"></div>
-                </div>
-                <div class="progress-footer">
-                    <span id="progress-details"></span>
-                    <span id="progress-eta"></span>
-                </div>
-            </div>
-
-            <div id="loading" class="loading" style="display: none;">
-                <div class="spinner"></div>
-                <p id="loading-text">Processing PDF...</p>
-            </div>
-
-            <div id="error-message" class="error-message" style="display: none;"></div>
-        </div>
-
-        <!-- Text Results Section -->
-        <div id="text-results-section" class="results-section" style="display: none;">
-            <div class="results-header">
-                <h2>Extracted Text</h2>
-                <div class="results-info">
-                    <span id="filename-display"></span>
-                    <span id="method-display"></span>
-                    <span id="ocr-display"></span>
-                </div>
-                <button id="copy-btn" class="copy-btn">
-                    <span>📋 Copy to Clipboard</span>
-                </button>
-            </div>
-            <div class="text-output">
-                <pre id="extracted-text"></pre>
+    <!-- Top Header Bar (Adobe Style) -->
+    <div class="app-header">
+        <div class="header-left">
+            <div class="app-logo">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                    <path d="M7 3H17C18.1046 3 19 3.89543 19 5V19C19 20.1046 18.1046 21 17 21H7C5.89543 21 5 20.1046 5 19V5C5 3.89543 5.89543 3 7 3Z" stroke="currentColor" stroke-width="2"/>
+                    <path d="M9 7H15M9 11H15M9 15H12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                </svg>
+                <span class="app-title">PDF Extractor Pro</span>
             </div>
         </div>
-
-        <!-- Image Results Section -->
-        <div id="image-results-section" class="results-section" style="display: none;">
-            <div class="results-header">
-                <h2>🎉 Extraction Complete!</h2>
-                <div class="results-info">
-                    <span id="image-filename-display"></span>
-                </div>
-                <button id="download-excel-btn" class="download-btn" style="display: none;">
-                    <span>📊 Download Excel Report</span>
+        
+        <div class="header-center">
+            <div class="toolbar">
+                <button class="tool-btn" id="open-file-btn" title="Open PDF">
+                    <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
+                        <path d="M4 3C3.44772 3 3 3.44772 3 4V16C3 16.5523 3.44772 17 4 17H16C16.5523 17 17 16.5523 17 16V7.41421C17 7.01639 16.842 6.63486 16.5607 6.35355L13.6464 3.43934C13.3651 3.15804 12.9836 3 12.5858 3H4ZM11 11H7V9H11V11Z"/>
+                    </svg>
+                    <span>Open</span>
+                </button>
+                <div class="toolbar-separator"></div>
+                <button class="tool-btn" id="extract-text-btn" title="Extract Text">
+                    <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
+                        <path d="M4 4H16V6H4V4ZM4 8H16V10H4V8ZM4 12H12V14H4V12Z"/>
+                    </svg>
+                    <span>Extract Text</span>
+                </button>
+                <button class="tool-btn" id="extract-images-btn" title="Extract Images">
+                    <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
+                        <path d="M3 3H17C17.5523 3 18 3.44772 18 4V16C18 16.5523 17.5523 17 17 17H3C2.44772 17 2 16.5523 2 16V4C2 3.44772 2.44772 3 3 3ZM14 8L11 12L9 9.5L6 14H14V8Z"/>
+                    </svg>
+                    <span>Extract Images</span>
+                </button>
+                <div class="toolbar-separator"></div>
+                <button class="tool-btn" id="export-btn" title="Export Results" disabled>
+                    <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
+                        <path d="M10 3L10 13M10 3L6 7M10 3L14 7M4 15H16V17H4V15Z"/>
+                    </svg>
+                    <span>Export</span>
                 </button>
             </div>
-            <div class="image-results-summary">
-                <div class="stat-card">
-                    <div class="stat-value" id="total-images">0</div>
-                    <div class="stat-label">Total Images Found</div>
-                </div>
-                <div class="stat-card success">
-                    <div class="stat-value" id="processed-images">0</div>
-                    <div class="stat-label">Products with SKU</div>
-                </div>
-                <div class="stat-card warning">
-                    <div class="stat-value" id="skipped-images">0</div>
-                    <div class="stat-label">Skipped (No SKU)</div>
-                </div>
-            </div>
-            <div class="image-results-list">
-                <h3>📦 Extracted Products</h3>
-                <div id="products-list"></div>
-            </div>
-            <div class="output-info">
-                <h3>📁 Output Location</h3>
-                <p>Your files have been organized in category folders with:</p>
-                <ul>
-                    <li>✅ High-quality WebP images (SKU-named)</li>
-                    <li>✅ JSON metadata files with colors and SVG paths</li>
-                    <li>✅ Excel report with all product information</li>
-                </ul>
-                <p class="output-path">Check the <strong>output/</strong> folder in your application directory</p>
-            </div>
+        </div>
+        
+        <div class="header-right">
+            <button class="icon-btn" id="settings-btn" title="Settings">
+                <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
+                    <path d="M10 6C7.79086 6 6 7.79086 6 10C6 12.2091 7.79086 14 10 14C12.2091 14 14 12.2091 14 10C14 7.79086 12.2091 6 10 6ZM10 8C11.1046 8 12 8.89543 12 10C12 11.1046 11.1046 12 10 12C8.89543 12 8 11.1046 8 10C8 8.89543 8.89543 8 10 8Z"/>
+                    <path d="M8.5 3H11.5L12 5.5L14 6.5L16 5L17.5 7.5L16 9.5V10.5L17.5 12.5L16 15L14 13.5L12 14.5L11.5 17H8.5L8 14.5L6 13.5L4 15L2.5 12.5L4 10.5V9.5L2.5 7.5L4 5L6 6.5L8 5.5L8.5 3Z"/>
+                </svg>
+            </button>
         </div>
     </div>
 
-    <footer>
-        <p>🚀 Powered by Flask, PyMuPDF, Tesseract OCR (Multi-language), and Google Gemini AI | The Most Powerful PDF Tool</p>
-        <p style="font-size: 0.8rem; margin-top: 8px; color: var(--text-muted);">Supports: English • العربية • 中文繁體 • 中文简体</p>
-    </footer>
+    <!-- Main Container with Sidebar Layout -->
+    <div class="app-container">
+        <!-- Left Sidebar (Tools Panel) -->
+        <aside class="left-sidebar" id="left-sidebar">
+            <div class="sidebar-header">
+                <h3>Tools</h3>
+                <button class="toggle-sidebar-btn" id="toggle-sidebar-btn">
+                    <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+                        <path d="M10 4L6 8L10 12"/>
+                    </svg>
+                </button>
+            </div>
+            
+            <div class="tools-list">
+                <div class="tool-category">
+                    <div class="category-title">Extraction</div>
+                    <button class="tool-item active" data-tool="text-extract">
+                        <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
+                            <path d="M4 4H16V6H4V4ZM4 8H16V10H4V8ZM4 12H12V14H4V12Z"/>
+                        </svg>
+                        <span>Text & OCR</span>
+                    </button>
+                    <button class="tool-item" data-tool="image-extract">
+                        <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
+                            <path d="M3 3H17C17.5523 3 18 3.44772 18 4V16C18 16.5523 17.5523 17 17 17H3C2.44772 17 2 16.5523 2 16V4C2 3.44772 2.44772 3 3 3ZM14 8L11 12L9 9.5L6 14H14V8Z"/>
+                        </svg>
+                        <span>Images & AI</span>
+                    </button>
+                </div>
+                
+                <div class="tool-category">
+                    <div class="category-title">Analysis</div>
+                    <button class="tool-item" data-tool="metadata">
+                        <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
+                            <path d="M10 2C5.58172 2 2 5.58172 2 10C2 14.4183 5.58172 18 10 18C14.4183 18 18 14.4183 18 10C18 5.58172 14.4183 2 10 2ZM9 6H11V8H9V6ZM9 10H11V14H9V10Z"/>
+                        </svg>
+                        <span>PDF Info</span>
+                    </button>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Content Area -->
+        <main class="main-content">
+            <!-- Welcome Screen (shown when no file is loaded) -->
+            <div class="welcome-screen" id="welcome-screen">
+                <div class="welcome-content">
+                    <div class="welcome-icon">
+                        <svg width="120" height="120" viewBox="0 0 120 120" fill="none">
+                            <rect x="20" y="15" width="80" height="90" rx="8" stroke="currentColor" stroke-width="3" opacity="0.3"/>
+                            <path d="M35 35H85M35 50H85M35 65H70" stroke="currentColor" stroke-width="3" stroke-linecap="round" opacity="0.5"/>
+                        </svg>
+                    </div>
+                    <h2>Select a tool to get started</h2>
+                    <p>Open a PDF file or choose a tool from the left panel</p>
+                    
+                    <div class="quick-actions">
+                        <button class="quick-action-btn" id="quick-open-btn">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M5 4H19C20.1046 4 21 4.89543 21 6V18C21 19.1046 20.1046 20 19 20H5C3.89543 20 3 19.1046 3 18V6C3 4.89543 3.89543 4 5 4ZM13 10H9V12H13V10Z"/>
+                            </svg>
+                            <span>Open PDF File</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Work Area (shown when processing) -->
+            <div class="work-area" id="work-area" style="display: none;">
+                <form id="upload-form" enctype="multipart/form-data" style="display: none;">
+                    <input type="file" id="pdf-file" name="file" accept=".pdf" required>
+                </form>
+
+                <!-- Progress Section -->
+                <div id="progress-container" class="progress-container" style="display: none;">
+                    <div class="progress-info">
+                        <div class="progress-icon">
+                            <div class="spinner-adobe"></div>
+                        </div>
+                        <div class="progress-text">
+                            <h3 id="progress-message">Processing...</h3>
+                            <p id="progress-details"></p>
+                        </div>
+                    </div>
+                    <div class="progress-bar-container">
+                        <div class="progress-bar-fill" id="progress-fill"></div>
+                    </div>
+                    <div class="progress-stats">
+                        <span id="progress-percentage">0%</span>
+                        <span id="progress-eta"></span>
+                    </div>
+                </div>
+
+                <div id="loading" class="loading-adobe" style="display: none;">
+                    <div class="spinner-adobe"></div>
+                    <p id="loading-text">Processing PDF...</p>
+                </div>
+
+                <div id="error-message" class="error-message-adobe" style="display: none;"></div>
+
+                <!-- Text Results Section -->
+                <div id="text-results-section" class="results-panel" style="display: none;">
+                    <div class="results-header-bar">
+                        <div class="results-title">
+                            <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
+                                <path d="M4 4H16V6H4V4ZM4 8H16V10H4V8ZM4 12H12V14H4V12Z"/>
+                            </svg>
+                            <span>Extracted Text</span>
+                        </div>
+                        <div class="results-actions">
+                            <button id="copy-btn" class="action-btn-adobe">
+                                <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+                                    <path d="M4 2H12C13.1046 2 14 2.89543 14 4V12C14 13.1046 13.1046 14 12 14H4C2.89543 14 2 13.1046 2 12V4C2 2.89543 2.89543 2 4 2Z"/>
+                                </svg>
+                                Copy
+                            </button>
+                        </div>
+                    </div>
+                    <div class="results-info-bar">
+                        <span id="filename-display"></span>
+                        <span class="info-separator">•</span>
+                        <span id="method-display"></span>
+                        <span class="info-separator">•</span>
+                        <span id="ocr-display"></span>
+                    </div>
+                    <div class="text-viewer">
+                        <pre id="extracted-text"></pre>
+                    </div>
+                </div>
+
+                <!-- Image Results Section -->
+                <div id="image-results-section" class="results-panel" style="display: none;">
+                    <div class="results-header-bar">
+                        <div class="results-title">
+                            <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
+                                <path d="M3 3H17C17.5523 3 18 3.44772 18 4V16C18 16.5523 17.5523 17 17 17H3C2.44772 17 2 16.5523 2 16V4C2 3.44772 2.44772 3 3 3Z"/>
+                            </svg>
+                            <span>Extraction Complete</span>
+                        </div>
+                        <div class="results-actions">
+                            <button id="download-excel-btn" class="action-btn-adobe primary" style="display: none;">
+                                <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+                                    <path d="M8 2V10M8 10L5 7M8 10L11 7M3 12H13V14H3V12Z"/>
+                                </svg>
+                                Download Excel
+                            </button>
+                        </div>
+                    </div>
+                    <div class="results-info-bar">
+                        <span id="image-filename-display"></span>
+                    </div>
+                    <div class="results-stats">
+                        <div class="stat-box">
+                            <div class="stat-number" id="total-images">0</div>
+                            <div class="stat-label">Total Images</div>
+                        </div>
+                        <div class="stat-box success">
+                            <div class="stat-number" id="processed-images">0</div>
+                            <div class="stat-label">With SKU</div>
+                        </div>
+                        <div class="stat-box warning">
+                            <div class="stat-number" id="skipped-images">0</div>
+                            <div class="stat-label">Skipped</div>
+                        </div>
+                    </div>
+                    <div class="products-container">
+                        <div class="section-title">Extracted Products</div>
+                        <div id="products-list" class="products-grid"></div>
+                    </div>
+                    <div class="output-location">
+                        <div class="section-title">Output Location</div>
+                        <div class="output-description">
+                            <p>Files organized in category folders with WebP images, JSON metadata, and Excel report.</p>
+                            <div class="output-path">
+                                <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+                                    <path d="M2 3H7L8 4H14V13H2V3Z"/>
+                                </svg>
+                                <code>output/</code>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <!-- Right Sidebar (Properties Panel) -->
+        <aside class="right-sidebar" id="right-sidebar">
+            <div class="sidebar-header">
+                <h3>Properties</h3>
+            </div>
+            
+            <div class="properties-content">
+                <!-- Text Extraction Options -->
+                <div id="text-options" class="property-section">
+                    <div class="property-group">
+                        <label class="property-label">Extraction Method</label>
+                        <div class="radio-group-adobe">
+                            <label class="radio-option">
+                                <input type="radio" name="method" value="pdfplumber" checked>
+                                <span class="radio-custom"></span>
+                                <span class="radio-text">PDFPlumber</span>
+                                <span class="badge-recommended">Recommended</span>
+                            </label>
+                            <label class="radio-option">
+                                <input type="radio" name="method" value="pypdf2">
+                                <span class="radio-custom"></span>
+                                <span class="radio-text">PyPDF2</span>
+                            </label>
+                        </div>
+                    </div>
+                    
+                    <div class="property-group">
+                        <label class="property-label">OCR Options</label>
+                        <label class="checkbox-option">
+                            <input type="checkbox" name="use_ocr" checked>
+                            <span class="checkbox-custom"></span>
+                            <span class="checkbox-text">Enable Multi-language OCR</span>
+                        </label>
+                        <div class="help-text-adobe">
+                            <svg width="14" height="14" viewBox="0 0 14 14" fill="currentColor">
+                                <path d="M7 0C3.13401 0 0 3.13401 0 7C0 10.866 3.13401 14 7 14C10.866 14 14 10.866 14 7C14 3.13401 10.866 0 7 0ZM6 4H8V6H6V4ZM6 8H8V10H6V8Z"/>
+                            </svg>
+                            Supports: English, Arabic, Chinese
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Image Extraction Options -->
+                <div id="image-options" class="property-section" style="display: none;">
+                    <div class="property-group">
+                        <div class="info-panel-adobe">
+                            <div class="info-header">
+                                <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
+                                    <path d="M10 2L12.5 7L18 8L14 12L15 18L10 15L5 18L6 12L2 8L7.5 7L10 2Z"/>
+                                </svg>
+                                <span>AI-Powered Analysis</span>
+                            </div>
+                            <ul class="feature-list-adobe">
+                                <li>Ultra-HD extraction (300-400 DPI)</li>
+                                <li>Gemini AI for SKU detection</li>
+                                <li>Auto product categorization</li>
+                                <li>Color extraction & SVG paths</li>
+                                <li>Excel report generation</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </aside>
+    </div>
+
+    <!-- Status Bar (Bottom) -->
+    <div class="status-bar">
+        <div class="status-left">
+            <span id="status-text">Ready</span>
+        </div>
+        <div class="status-right">
+            <span class="status-item">
+                <svg width="12" height="12" viewBox="0 0 12 12" fill="currentColor">
+                    <circle cx="6" cy="6" r="5"/>
+                </svg>
+                English • العربية • 中文
+            </span>
+        </div>
+    </div>
 
     <script src="{{ url_for('static', filename='js/script.js') }}"></script>
 </body>
