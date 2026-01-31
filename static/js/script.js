@@ -237,7 +237,9 @@ document.addEventListener('DOMContentLoaded', function() {
     if (downloadExcelBtn) {
         downloadExcelBtn.addEventListener('click', function() {
             if (excelFileName) {
-                window.location.href = `/download-excel/${excelFileName}`;
+                // Properly encode filename to handle special characters
+                const encodedFilename = encodeURIComponent(excelFileName);
+                window.location.href = `/download-excel/${encodedFilename}`;
             }
         });
     }

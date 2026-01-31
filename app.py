@@ -23,9 +23,13 @@ app.config['OUTPUT_FOLDER'] = 'output'
 app.config['MAX_CONTENT_LENGTH'] = 50 * 1024 * 1024  # 50MB max file size
 ALLOWED_EXTENSIONS = {'pdf'}
 
-# Gemini API Configuration
-GEMINI_API_KEY = "AIzaSyDLumkxN_6uKWwqJKs5QwOT8jP9sGCW0hQ"
+# Gemini API Configuration - Use environment variable for security
+GEMINI_API_KEY = os.environ.get('GEMINI_API_KEY', 'AIzaSyDLumkxN_6uKWwqJKs5QwOT8jP9sGCW0hQ')
 genai.configure(api_key=GEMINI_API_KEY)
+
+# Multi-language OCR configuration
+# Supports English, Arabic, Chinese Traditional, Chinese Simplified
+TESSERACT_LANGUAGES = 'eng+ara+chi_tra+chi_sim'
 
 # Create necessary directories
 os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
@@ -57,7 +61,8 @@ def update_progress(task_id, current, total, message, eta_seconds=None):
 
 def perform_ocr_on_pdf(pdf_path, task_id=None):
     """
-    Perform OCR on PDF pages to extract text from scanned documents.
+    Perform multi-language OCR on PDF pages to extract text.
+    Supports English, Arabic, Chinese Traditional, and Chinese Simplified.
     Returns concatenated text from all pages.
     """
     ocr_text = ""
@@ -65,24 +70,24 @@ def perform_ocr_on_pdf(pdf_path, task_id=None):
     try:
         # Convert PDF to images
         if task_id:
-            update_progress(task_id, 0, 100, "Converting PDF to images for OCR...")
+            update_progress(task_id, 0, 100, "Converting PDF to images for multi-language OCR...")
         
         images = convert_from_path(pdf_path, dpi=300)
         total_pages = len(images)
         
         for i, image in enumerate(images):
             if task_id:
-                update_progress(task_id, i, total_pages, f"OCR scanning page {i+1}/{total_pages}...")
+                update_progress(task_id, i, total_pages, f"OCR scanning page {i+1}/{total_pages} (English/Arabic/Chinese)...")
             
-            # Perform OCR on the image
-            page_text = pytesseract.image_to_string(image)
-            ocr_text += f"\n--- Page {i + 1} (OCR) ---\n"
+            # Perform OCR with multi-language support
+            page_text = pytesseract.image_to_string(image, lang=TESSERACT_LANGUAGES)
+            ocr_text += f"\n--- Page {i + 1} (Multi-language OCR) ---\n"
             ocr_text += page_text
         
         return ocr_text
         
     except Exception as e:
-        return f"OCR failed: {str(e)}"
+        return f"OCR failed: {str(e)}. Please ensure Tesseract language packs are installed (eng, ara, chi_tra, chi_sim)."
 
 
 def extract_text_pypdf2(pdf_path, task_id=None):
@@ -579,13 +584,25 @@ def get_progress(task_id):
         return jsonify({'error': 'Task not found'}), 404
 
 
-@app.route('/download-excel/<path:filename>')
+@app.route('/download-excel/<filename>')
 def download_excel(filename):
     """Download Excel report."""
     try:
-        file_path = os.path.join(app.config['OUTPUT_FOLDER'], filename)
-        if os.path.exists(file_path):
-            return send_file(file_path, as_attachment=True)
+        # Security: Use secure_filename to prevent path traversal
+        safe_filename = secure_filename(filename)
+        
+        # Construct full path
+        file_path = os.path.join(app.config['OUTPUT_FOLDER'], safe_filename)
+        
+        # Verify the file is within OUTPUT_FOLDER (prevent directory traversal)
+        abs_output_folder = os.path.abspath(app.config['OUTPUT_FOLDER'])
+        abs_file_path = os.path.abspath(file_path)
+        
+        if not abs_file_path.startswith(abs_output_folder):
+            return jsonify({'error': 'Invalid file path'}), 403
+        
+        if os.path.exists(abs_file_path):
+            return send_file(abs_file_path, as_attachment=True)
         else:
             return jsonify({'error': 'File not found'}), 404
     except Exception as e:

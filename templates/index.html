@@ -51,9 +51,9 @@
                     <div class="ocr-option">
                         <label class="checkbox-label">
                             <input type="checkbox" name="use_ocr" checked>
-                            <span>🔍 Enable Automatic OCR (for scanned PDFs)</span>
+                            <span>🔍 Enable Automatic OCR (Multi-language)</span>
                         </label>
-                        <p class="help-text">OCR will automatically scan images in PDF to extract text</p>
+                        <p class="help-text">OCR supports English, Arabic, Chinese Traditional & Simplified</p>
                     </div>
                 </div>
 
@@ -165,7 +165,8 @@
     </div>
 
     <footer>
-        <p>🚀 Powered by Flask, PyMuPDF, Tesseract OCR, and Google Gemini AI | The Most Powerful PDF Tool</p>
+        <p>🚀 Powered by Flask, PyMuPDF, Tesseract OCR (Multi-language), and Google Gemini AI | The Most Powerful PDF Tool</p>
+        <p style="font-size: 0.8rem; margin-top: 8px; color: var(--text-muted);">Supports: English • العربية • 中文繁體 • 中文简体</p>
     </footer>
 
     <script src="{{ url_for('static', filename='js/script.js') }}"></script>
