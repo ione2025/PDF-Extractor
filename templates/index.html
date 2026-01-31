@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PDF Text Extractor</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>📄 PDF Text Extractor</h1>
+            <p class="subtitle">Upload a PDF file to extract text content</p>
+        </header>
+
+        <div class="upload-section">
+            <form id="upload-form" enctype="multipart/form-data">
+                <div class="file-input-wrapper">
+                    <input type="file" id="pdf-file" name="file" accept=".pdf" required>
+                    <label for="pdf-file" class="file-label">
+                        <span class="file-icon">📁</span>
+                        <span class="file-text">Choose PDF File</span>
+                    </label>
+                </div>
+
+                <div class="method-selector">
+                    <label>Extraction Method:</label>
+                    <div class="radio-group">
+                        <label class="radio-label">
+                            <input type="radio" name="method" value="pdfplumber" checked>
+                            <span>PDFPlumber (Recommended)</span>
+                        </label>
+                        <label class="radio-label">
+                            <input type="radio" name="method" value="pypdf2">
+                            <span>PyPDF2</span>
+                        </label>
+                    </div>
+                </div>
+
+                <button type="submit" class="extract-btn" id="extract-btn">
+                    <span class="btn-text">Extract Text</span>
+                </button>
+            </form>
+
+            <div id="loading" class="loading" style="display: none;">
+                <div class="spinner"></div>
+                <p>Extracting text from PDF...</p>
+            </div>
+
+            <div id="error-message" class="error-message" style="display: none;"></div>
+        </div>
+
+        <div id="results-section" class="results-section" style="display: none;">
+            <div class="results-header">
+                <h2>Extracted Text</h2>
+                <div class="results-info">
+                    <span id="filename-display"></span>
+                    <span id="method-display"></span>
+                </div>
+                <button id="copy-btn" class="copy-btn">
+                    <span>📋 Copy to Clipboard</span>
+                </button>
+            </div>
+            <div class="text-output">
+                <pre id="extracted-text"></pre>
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        <p>Built with Flask, PyPDF2, and PDFPlumber</p>
+    </footer>
+
+    <script src="{{ url_for('static', filename='js/script.js') }}"></script>
+</body>
+</html>
