@@ -3,17 +3,29 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PDF Text Extractor</title>
+    <title>PDF Extractor Pro - Most Powerful PDF Tool</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
 </head>
 <body>
     <div class="container">
         <header>
-            <h1>📄 PDF Text Extractor</h1>
-            <p class="subtitle">Upload a PDF file to extract text content</p>
+            <h1>🚀 PDF Extractor Pro</h1>
+            <p class="subtitle">The Most Powerful PDF Tool - Extract text, images, OCR scan, and AI-powered analysis</p>
         </header>
 
         <div class="upload-section">
+            <div class="mode-selector">
+                <label>Extraction Mode:</label>
+                <div class="mode-tabs">
+                    <button class="mode-tab active" data-mode="text">
+                        📝 Text Extraction + OCR
+                    </button>
+                    <button class="mode-tab" data-mode="images">
+                        🖼️ AI Image Analysis + Excel
+                    </button>
+                </div>
+            </div>
+
             <form id="upload-form" enctype="multipart/form-data">
                 <div class="file-input-wrapper">
                     <input type="file" id="pdf-file" name="file" accept=".pdf" required>
@@ -23,8 +35,9 @@
                     </label>
                 </div>
 
-                <div class="method-selector">
-                    <label>Extraction Method:</label>
+                <!-- Text Extraction Options -->
+                <div id="text-options" class="method-selector">
+                    <label>Text Extraction Method:</label>
                     <div class="radio-group">
                         <label class="radio-label">
                             <input type="radio" name="method" value="pdfplumber" checked>
@@ -35,27 +48,70 @@
                             <span>PyPDF2</span>
                         </label>
                     </div>
+                    <div class="ocr-option">
+                        <label class="checkbox-label">
+                            <input type="checkbox" name="use_ocr" checked>
+                            <span>🔍 Enable Automatic OCR (for scanned PDFs)</span>
+                        </label>
+                        <p class="help-text">OCR will automatically scan images in PDF to extract text</p>
+                    </div>
+                </div>
+
+                <!-- Image Extraction Info -->
+                <div id="image-options" class="method-selector" style="display: none;">
+                    <div class="info-box">
+                        <h3>🤖 AI-Powered Image Extraction & Analysis</h3>
+                        <p><strong>This mode will:</strong></p>
+                        <ul>
+                            <li>✅ Extract Ultra-HD images (300-400 DPI)</li>
+                            <li>✅ AI analysis with Gemini 1.5 Flash for SKU detection</li>
+                            <li>✅ Categorize products automatically</li>
+                            <li>✅ Extract product descriptions</li>
+                            <li>✅ Generate SVG paths for 3D modeling</li>
+                            <li>✅ Detect primary and secondary colors</li>
+                            <li>✅ Save as WebP with organized folders</li>
+                            <li>✅ Create Excel report with all SKUs</li>
+                            <li>✅ Real-time progress tracking</li>
+                        </ul>
+                    </div>
                 </div>
 
                 <button type="submit" class="extract-btn" id="extract-btn">
-                    <span class="btn-text">Extract Text</span>
+                    <span class="btn-text">Extract</span>
                 </button>
             </form>
 
+            <!-- Progress Bar -->
+            <div id="progress-container" class="progress-container" style="display: none;">
+                <div class="progress-header">
+                    <span id="progress-message">Processing...</span>
+                    <span id="progress-percentage">0%</span>
+                </div>
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progress-fill"></div>
+                </div>
+                <div class="progress-footer">
+                    <span id="progress-details"></span>
+                    <span id="progress-eta"></span>
+                </div>
+            </div>
+
             <div id="loading" class="loading" style="display: none;">
                 <div class="spinner"></div>
-                <p>Extracting text from PDF...</p>
+                <p id="loading-text">Processing PDF...</p>
             </div>
 
             <div id="error-message" class="error-message" style="display: none;"></div>
         </div>
 
-        <div id="results-section" class="results-section" style="display: none;">
+        <!-- Text Results Section -->
+        <div id="text-results-section" class="results-section" style="display: none;">
             <div class="results-header">
                 <h2>Extracted Text</h2>
                 <div class="results-info">
                     <span id="filename-display"></span>
                     <span id="method-display"></span>
+                    <span id="ocr-display"></span>
                 </div>
                 <button id="copy-btn" class="copy-btn">
                     <span>📋 Copy to Clipboard</span>
@@ -65,10 +121,51 @@
                 <pre id="extracted-text"></pre>
             </div>
         </div>
+
+        <!-- Image Results Section -->
+        <div id="image-results-section" class="results-section" style="display: none;">
+            <div class="results-header">
+                <h2>🎉 Extraction Complete!</h2>
+                <div class="results-info">
+                    <span id="image-filename-display"></span>
+                </div>
+                <button id="download-excel-btn" class="download-btn" style="display: none;">
+                    <span>📊 Download Excel Report</span>
+                </button>
+            </div>
+            <div class="image-results-summary">
+                <div class="stat-card">
+                    <div class="stat-value" id="total-images">0</div>
+                    <div class="stat-label">Total Images Found</div>
+                </div>
+                <div class="stat-card success">
+                    <div class="stat-value" id="processed-images">0</div>
+                    <div class="stat-label">Products with SKU</div>
+                </div>
+                <div class="stat-card warning">
+                    <div class="stat-value" id="skipped-images">0</div>
+                    <div class="stat-label">Skipped (No SKU)</div>
+                </div>
+            </div>
+            <div class="image-results-list">
+                <h3>📦 Extracted Products</h3>
+                <div id="products-list"></div>
+            </div>
+            <div class="output-info">
+                <h3>📁 Output Location</h3>
+                <p>Your files have been organized in category folders with:</p>
+                <ul>
+                    <li>✅ High-quality WebP images (SKU-named)</li>
+                    <li>✅ JSON metadata files with colors and SVG paths</li>
+                    <li>✅ Excel report with all product information</li>
+                </ul>
+                <p class="output-path">Check the <strong>output/</strong> folder in your application directory</p>
+            </div>
+        </div>
     </div>
 
     <footer>
-        <p>Built with Flask, PyPDF2, and PDFPlumber</p>
+        <p>🚀 Powered by Flask, PyMuPDF, Tesseract OCR, and Google Gemini AI | The Most Powerful PDF Tool</p>
     </footer>
 
     <script src="{{ url_for('static', filename='js/script.js') }}"></script>

@@ -45,6 +45,13 @@ Thumbs.db
 uploads/
 *.pdf
 
+# Extracted files
+extracted/
+output/
+*.webp
+*.json
+*.xlsx
+
 # Testing
 .pytest_cache/
 .coverage
