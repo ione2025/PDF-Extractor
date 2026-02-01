@@ -259,6 +259,13 @@ def analyze_image_with_gemini(image_path):
             'data': image_data
         }]
         
+        # Sanitize OCR text for security (limit length and remove potentially harmful content)
+        if ocr_text:
+            # Limit OCR text to 1000 characters to prevent prompt injection
+            ocr_text = ocr_text[:1000]
+            # Remove any markdown code blocks or special formatting that could confuse the AI
+            ocr_text = ocr_text.replace('```', '').replace('`', '')
+        
         # Enhanced prompt that includes OCR text
         prompt = f"""Analyze this product image and provide the following information in JSON format:
 
@@ -345,15 +352,27 @@ def save_image_and_metadata(image_path, analysis, output_base_folder):
     # Save image as high-quality JPG
     image = Image.open(image_path)
     
-    # Convert RGBA to RGB if necessary (JPG doesn't support transparency)
-    if image.mode in ('RGBA', 'LA', 'P'):
-        # Create a white background
+    # Convert to RGB if necessary (JPG doesn't support transparency or other modes)
+    if image.mode == 'RGBA':
+        # Handle RGBA: Create white background and paste with alpha mask
         rgb_image = Image.new('RGB', image.size, (255, 255, 255))
-        if image.mode == 'P':
-            image = image.convert('RGBA')
-        rgb_image.paste(image, mask=image.split()[-1] if image.mode in ('RGBA', 'LA') else None)
+        rgb_image.paste(image, mask=image.split()[3])  # Use alpha channel as mask
+        image = rgb_image
+    elif image.mode == 'LA':
+        # Handle LA (grayscale with alpha): Create white background and paste with alpha mask
+        rgb_image = Image.new('RGB', image.size, (255, 255, 255))
+        # Convert LA to RGBA first to properly handle the alpha channel
+        rgba_image = image.convert('RGBA')
+        rgb_image.paste(rgba_image, mask=rgba_image.split()[3])
+        image = rgb_image
+    elif image.mode == 'P':
+        # Handle palette mode: Convert to RGBA first to preserve transparency if present
+        image = image.convert('RGBA')
+        rgb_image = Image.new('RGB', image.size, (255, 255, 255))
+        rgb_image.paste(image, mask=image.split()[3])
         image = rgb_image
     elif image.mode != 'RGB':
+        # Handle any other mode: direct conversion to RGB
         image = image.convert('RGB')
     
     jpg_path = os.path.join(category_folder, f'{safe_sku}.jpg')

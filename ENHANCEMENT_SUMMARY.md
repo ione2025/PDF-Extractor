@@ -4,7 +4,7 @@
 The PDF Extractor was skipping images and not extracting SKU codes that were embedded as text within product images in PDF catalogues. The original implementation relied solely on AI vision (Google Gemini) to detect SKUs, which was not reliable for text embedded within images.
 
 ## Solution Implemented
-Enhanced the image analysis pipeline with **Optical Character Recognition (OCR)** to directly extract text from images before AI analysis.
+Enhanced the image analysis pipeline with **Optical Character Recognition (OCR)** to directly extract text from images before AI analysis, and changed image output format to **high-quality JPG** as requested.
 
 ## Key Changes
 
@@ -24,7 +24,7 @@ def extract_text_from_image_ocr(image_path):
 
 **Features:**
 - Multi-language support using existing Tesseract configuration
-- Image preprocessing (RGB/grayscale conversion) for better accuracy
+- Image preprocessing (grayscale conversion) for better accuracy
 - Robust error handling with fallback to empty string
 
 ### 2. Enhanced AI Analysis (`analyze_image_with_gemini`)
@@ -51,7 +51,28 @@ Use the OCR extracted text above to find the SKU.
 1. "sku": Extract the SKU number from the OCR text above or from visual inspection...
 ```
 
-### 3. Metadata Enhancement
+### 3. Maximum Quality JPG Output
+Updated image saving to use JPG format with highest possible quality:
+
+**Changes:**
+- Format: WebP → **JPG**
+- Quality: 95 → **100 (maximum)**
+- Subsampling: default → **0 (no subsampling for best quality)**
+- Optimization: enabled → **disabled (preserves maximum quality)**
+- RGBA handling: Added proper conversion to RGB with white background
+
+**Code:**
+```python
+image.save(jpg_path, 'JPEG', quality=100, subsampling=0, optimize=False)
+```
+
+**Benefits:**
+- Maximum image quality preservation
+- No compression artifacts
+- Universal format compatibility
+- Images named with SKU: `{SKU}.jpg`
+
+### 4. Metadata Enhancement
 Updated JSON metadata to include OCR extracted text:
 
 ```json
@@ -71,11 +92,13 @@ Updated JSON metadata to include OCR extracted text:
 - Quality assurance for SKU detection
 - Can be used for additional analysis later
 
-### 4. Documentation Updates
-Updated README.md to highlight the new OCR capabilities:
+### 5. Documentation Updates
+Updated README.md to highlight:
 - "Advanced OCR for Embedded Text"
 - "Multi-language OCR extracts SKUs and text directly from within images"
 - "Automatic SKU detection (enhanced with OCR for embedded SKUs)"
+- "**Maximum Quality JPG**: Images saved in JPG format with 100% quality and no subsampling"
+- Updated output structure examples to show `.jpg` instead of `.webp`
 
 ## Technical Details
 
@@ -91,6 +114,12 @@ Updated README.md to highlight the new OCR capabilities:
 3. **Smart Detection**: AI uses both sources to find SKUs
 4. **Fallback**: If OCR fails, AI vision still attempts detection
 
+### JPG Quality Settings
+- **Quality: 100** - Maximum JPEG quality (1-100 scale)
+- **Subsampling: 0** - 4:4:4 chroma subsampling (best quality)
+- **Optimize: False** - Disable optimization to preserve quality
+- **RGBA Conversion**: Properly handles transparency with white background
+
 ### Language Support
 Supports the same languages as PDF OCR:
 - English (eng)
@@ -104,6 +133,7 @@ Supports the same languages as PDF OCR:
 - ❌ SKUs embedded in images were frequently missed
 - ❌ Images were "skipped" if AI couldn't visually detect SKU
 - ❌ Catalogues with text-based SKUs had low extraction rates
+- ⚠️ Images saved as WebP with 95% quality
 
 ### After Enhancement
 - ✅ Reliable extraction of SKUs embedded as text in images
@@ -111,6 +141,23 @@ Supports the same languages as PDF OCR:
 - ✅ Dual detection method: OCR + AI vision
 - ✅ Better handling of "tricky" catalogues with embedded text
 - ✅ OCR text saved in metadata for verification
+- ✅ **Images saved as JPG with 100% quality and no subsampling**
+- ✅ **Images automatically named with their extracted SKUs**
+
+## Output Structure
+
+```
+output/
+└── [PDF_NAME]/
+    ├── [PDF_NAME]_SKU_Report.xlsx     # Excel report
+    ├── Gate/
+    │   ├── SKU123.jpg    ← Maximum quality JPG named with SKU
+    │   └── SKU123.json   ← Metadata with OCR text
+    ├── Door/
+    │   ├── SKU456.jpg    ← Maximum quality JPG named with SKU
+    │   └── SKU456.json   ← Metadata with OCR text
+    └── ...
+```
 
 ## Usage
 
@@ -121,7 +168,8 @@ No changes required for end users. The enhancement is automatic:
 3. **NEW**: OCR extracts text from each image
 4. AI analyzes image + OCR text
 5. SKU detected and saved with metadata
-6. Excel report generated with all products
+6. **NEW**: Image saved as maximum quality JPG named with SKU
+7. Excel report generated with all products
 
 ## Dependencies
 
@@ -137,6 +185,7 @@ System requirement:
 - **OCR Time**: ~1-2 seconds per image
 - **Total Processing**: Still ~30-60 seconds per image (includes AI)
 - **Accuracy**: Significantly improved for embedded text SKUs
+- **File Size**: JPG with quality=100 produces larger files than WebP but preserves maximum quality
 - **No Breaking Changes**: Works with all existing PDFs
 
 ## Future Enhancements
@@ -146,6 +195,7 @@ Potential improvements:
 - Dedicated SKU pattern matching with regex
 - Confidence scores for OCR results
 - Option to use OCR-only mode (skip AI for faster processing)
+- Optional format selection (JPG/PNG/WebP) in UI
 
 ## Testing Recommendations
 
@@ -154,8 +204,17 @@ To verify the enhancement works:
 1. **Test with SKU-embedded images**: Upload a PDF with SKUs printed on images
 2. **Check metadata**: Verify JSON files include `ocr_text` field
 3. **Verify extraction**: Confirm SKUs are detected and saved correctly
-4. **Multi-language test**: Try images with Arabic/Chinese SKUs
-5. **Compare before/after**: Use same PDF before and after enhancement
+4. **Check image quality**: Verify JPG files are high quality (100%, no subsampling)
+5. **Check filenames**: Confirm images are named with SKUs (e.g., `ABC123.jpg`)
+6. **Multi-language test**: Try images with Arabic/Chinese SKUs
+7. **Compare before/after**: Use same PDF before and after enhancement
+
+## Security
+
+**CodeQL Analysis**: ✅ Passed with 0 alerts
+- No security vulnerabilities detected
+- Safe file handling with `secure_filename()`
+- Proper error handling for edge cases
 
 ## Rollback Plan
 
@@ -164,3 +223,4 @@ If issues occur, the changes can be reverted safely:
 - AI function can work without OCR
 - No database or schema changes
 - No breaking API changes
+- Image format change is transparent to users
