@@ -2,45 +2,49 @@
 
 **The Most Powerful PDF Tool Ever Created** - A sophisticated web application for extracting text and images from PDF files with AI-powered analysis, OCR scanning, and automated Excel reporting.
 
-**✨ Get Your Own Live Website in 2 Minutes!**
+![PDF Extractor Pro](https://github.com/user-attachments/assets/24da9158-c6f0-4033-9065-d994063d12ce)
+
+---
+
+## 💻 Quick Start - Run on Your PC
+
+### Simple 4-Step Installation:
+
+1. **Install Python 3.11+** from https://www.python.org/downloads/
+2. **Download this repository** (Code → Download ZIP)
+3. **Install dependencies:**
+   ```bash
+   pip install -r requirements.txt
+   ```
+4. **Run the application:**
+   ```bash
+   python app.py
+   ```
+
+Then open your browser to **http://localhost:5000** 🎉
+
+### 📖 Need detailed instructions?
+
+**→ [Click here for complete installation guide](INSTALL_LOCAL.md)**
+
+Includes:
+- Step-by-step instructions for Windows, Mac, and Linux
+- System requirements (Tesseract, Poppler)
+- Troubleshooting common issues
+- Configuration options
+
+---
+
+## 🌐 Alternative: Deploy to Cloud (Optional)
+
+Don't want to install locally? Deploy to free hosting:
 
 [![Deploy to Render](https://render.com/images/deploy-to-render-button.svg)](https://render.com/deploy?repo=https://github.com/ione2025/PDF-Extractor)
 [![Deploy on Railway](https://railway.app/button.svg)](https://railway.app/template/6JwSne?referralCode=alphasec)
 
-**🌐 [Click Here for Live Deployment Guide](DEPLOY_LIVE.md)** - Get your own website URL with one click!
+**📖 See [DEPLOY_LIVE.md](DEPLOY_LIVE.md) for cloud deployment guide**
 
-![PDF Extractor Pro](https://github.com/user-attachments/assets/24da9158-c6f0-4033-9065-d994063d12ce)
-
-## 🎯 Choose Your Experience
-
-### Option 1: Get a Live Website (Recommended) 🌟
-
-**No installation needed! Get a live URL like `https://your-app.onrender.com`**
-
-1. Click a deploy button above
-2. Sign in with GitHub (free)
-3. Wait 5 minutes
-4. Get your live website URL!
-
-**📖 See [DEPLOY_LIVE.md](DEPLOY_LIVE.md) for step-by-step instructions**
-
-### Option 2: Run Locally
-
-If you want to run on your computer:
-
-```bash
-# Install dependencies
-pip install -r requirements.txt
-
-# Run the application
-python app.py
-```
-
-Open your browser to **http://localhost:5000**
-
-The application will automatically open in your browser at `http://localhost:5000`
-
-**📖 See [WEB_INTERFACE.md](WEB_INTERFACE.md) for complete web interface documentation**
+---
 
 ## ✨ Features
 
