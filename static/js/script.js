@@ -2,8 +2,6 @@ document.addEventListener('DOMContentLoaded', function() {
     // Elements
     const uploadForm = document.getElementById('upload-form');
     const fileInput = document.getElementById('pdf-file');
-    const fileLabel = document.querySelector('.file-label .file-text');
-    const extractBtn = document.getElementById('extract-btn');
     const loading = document.getElementById('loading');
     const loadingText = document.getElementById('loading-text');
     const errorMessage = document.getElementById('error-message');
@@ -16,10 +14,16 @@ document.addEventListener('DOMContentLoaded', function() {
     const progressDetails = document.getElementById('progress-details');
     const progressEta = document.getElementById('progress-eta');
     
-    // Mode tabs
-    const modeTabs = document.querySelectorAll('.mode-tab');
+    // Toolbar buttons
+    const openFileBtn = document.getElementById('open-file-btn');
+    const extractTextBtn = document.getElementById('extract-text-btn');
+    const extractImagesBtn = document.getElementById('extract-images-btn');
+    const quickOpenBtn = document.getElementById('quick-open-btn');
+    
+    // Sidebar buttons
     const textOptions = document.getElementById('text-options');
     const imageOptions = document.getElementById('image-options');
+    const sidebarTools = document.querySelectorAll('.tool-item');
     
     // Results sections
     const textResultsSection = document.getElementById('text-results-section');
@@ -45,44 +49,84 @@ document.addEventListener('DOMContentLoaded', function() {
     let currentTaskId = null;
     let excelFileName = null;
 
-    // Mode switching
-    modeTabs.forEach(tab => {
-        tab.addEventListener('click', function() {
-            // Update active tab
-            modeTabs.forEach(t => t.classList.remove('active'));
-            this.classList.add('active');
-            
-            // Get selected mode
-            currentMode = this.dataset.mode;
-            
-            // Show/hide appropriate options
-            if (currentMode === 'text') {
-                textOptions.style.display = 'block';
-                imageOptions.style.display = 'none';
-                extractBtn.querySelector('.btn-text').textContent = 'Extract Text';
-            } else {
-                textOptions.style.display = 'none';
-                imageOptions.style.display = 'block';
-                extractBtn.querySelector('.btn-text').textContent = 'Extract & Analyze';
-            }
-            
-            // Hide results
+    // Helper function to update tool state
+    function updateToolState(toolType) {
+        // Update sidebar active state
+        sidebarTools.forEach(t => t.classList.remove('active'));
+        const toolElement = document.querySelector(`[data-tool="${toolType}"]`);
+        if (toolElement) toolElement.classList.add('active');
+        
+        // Update mode and show/hide appropriate options
+        if (toolType === 'text-extract') {
+            currentMode = 'text';
+            textOptions.style.display = 'block';
+            imageOptions.style.display = 'none';
+        } else if (toolType === 'image-extract') {
+            currentMode = 'image';
+            textOptions.style.display = 'none';
+            imageOptions.style.display = 'block';
+        } else if (toolType === 'metadata') {
+            currentMode = 'metadata';
+            textOptions.style.display = 'none';
+            imageOptions.style.display = 'none';
+        }
+    }
+
+    // Sidebar tool switching
+    sidebarTools.forEach(tool => {
+        tool.addEventListener('click', function() {
+            const toolType = this.dataset.tool;
+            updateToolState(toolType);
             hideAllResults();
         });
     });
 
-    // Update file label when file is selected
-    fileInput.addEventListener('change', function() {
+    // Open file button - triggers file selection
+    function openFileHandler() {
+        fileInput.click();
+    }
+    
+    if (openFileBtn) {
+        openFileBtn.addEventListener('click', openFileHandler);
+    }
+
+    // Quick open button - triggers file selection
+    if (quickOpenBtn) {
+        quickOpenBtn.addEventListener('click', openFileHandler);
+    }
+
+    // Extract button handler
+    function extractWithMode(toolType) {
+        updateToolState(toolType);
+        fileInput.click();
+    }
+
+    // Extract text button - triggers file selection with text mode
+    if (extractTextBtn) {
+        extractTextBtn.addEventListener('click', () => extractWithMode('text-extract'));
+    }
+
+    // Extract images button - triggers file selection with image mode
+    if (extractImagesBtn) {
+        extractImagesBtn.addEventListener('click', () => extractWithMode('image-extract'));
+    }
+
+    // Handle file selection - automatically submit when file is chosen
+    fileInput.addEventListener('change', async function() {
         if (this.files && this.files.length > 0) {
-            fileLabel.textContent = this.files[0].name;
-        } else {
-            fileLabel.textContent = 'Choose PDF File';
+            // Show work area
+            const welcomeScreen = document.getElementById('welcome-screen');
+            const workArea = document.getElementById('work-area');
+            if (welcomeScreen) welcomeScreen.style.display = 'none';
+            if (workArea) workArea.style.display = 'block';
+            
+            // Auto-submit the form by calling the handler directly
+            await handleFormSubmit();
         }
     });
 
     // Handle form submission
-    uploadForm.addEventListener('submit', async function(e) {
-        e.preventDefault();
+    async function handleFormSubmit() {
 
         const file = fileInput.files[0];
         if (!file) {
@@ -108,7 +152,6 @@ document.addEventListener('DOMContentLoaded', function() {
             loadingText.textContent = 'Starting AI analysis... This may take several minutes.';
         }
         showLoading();
-        extractBtn.disabled = true;
 
         // Prepare form data
         const formData = new FormData();
@@ -171,9 +214,8 @@ document.addEventListener('DOMContentLoaded', function() {
         } finally {
             hideLoading();
             hideProgress();
-            extractBtn.disabled = false;
         }
-    });
+    }
 
     // Progress polling
     function startProgressPolling(taskId) {

@@ -53,72 +53,112 @@ body {
     flex-direction: column;
 }
 
-/* Top Header Bar (Adobe Style) */
+/* Adobe Acrobat Reader DC Style Header */
 .app-header {
     background: var(--adobe-header);
     border-bottom: 1px solid var(--adobe-border);
-    height: 48px;
     display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 0 12px;
+    flex-direction: column;
     flex-shrink: 0;
     box-shadow: var(--shadow-sm);
 }
 
-.header-left {
+/* Menu Bar (First Row - Adobe Acrobat Style) */
+.menu-bar {
     display: flex;
     align-items: center;
-    gap: 16px;
+    justify-content: space-between;
+    height: 32px;
+    padding: 0 12px;
+    background: var(--adobe-header);
+    border-bottom: 1px solid var(--adobe-border);
+}
+
+.menu-bar-left {
+    display: flex;
+    align-items: center;
+    gap: 12px;
 }
 
 .app-logo {
     display: flex;
     align-items: center;
-    gap: 8px;
+    gap: 6px;
     color: var(--adobe-blue);
     font-weight: 600;
-    font-size: 14px;
+    font-size: 13px;
     padding: 0 8px;
 }
 
 .app-logo svg {
-    width: 24px;
-    height: 24px;
+    width: 18px;
+    height: 18px;
 }
 
 .app-title {
     color: var(--text-primary);
+    font-size: 13px;
 }
 
-.header-center {
-    flex: 1;
+.menu-items {
     display: flex;
-    justify-content: center;
+    align-items: center;
+    gap: 2px;
 }
 
-.toolbar {
+.menu-item {
+    padding: 4px 12px;
+    background: transparent;
+    border: none;
+    color: var(--text-secondary);
+    font-size: 12px;
+    cursor: pointer;
+    border-radius: 2px;
+    transition: all var(--transition-fast);
+    font-family: inherit;
+    font-weight: 400;
+}
+
+.menu-item:hover {
+    background: var(--adobe-hover);
+    color: var(--text-primary);
+}
+
+.menu-item span {
+    display: inline-block;
+}
+
+.menu-bar-right {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+/* Quick Tools Toolbar (Second Row - Adobe Acrobat Style) */
+.quick-toolbar {
     display: flex;
     align-items: center;
     gap: 4px;
+    padding: 4px 12px;
     background: var(--adobe-sidebar);
-    border-radius: 4px;
-    padding: 4px;
+    height: 36px;
+    border-bottom: 1px solid var(--adobe-border);
 }
 
 .tool-btn {
     display: flex;
     align-items: center;
-    gap: 6px;
-    padding: 6px 12px;
+    gap: 5px;
+    padding: 4px 10px;
     background: transparent;
     border: none;
     color: var(--text-secondary);
-    font-size: 13px;
+    font-size: 12px;
     cursor: pointer;
     border-radius: 3px;
     transition: all var(--transition-fast);
     font-family: inherit;
+    height: 28px;
 }
 
 .tool-btn:hover:not(:disabled) {
@@ -132,26 +172,24 @@ body {
 }
 
 .tool-btn svg {
-    width: 18px;
-    height: 18px;
+    width: 16px;
+    height: 16px;
+}
+
+.tool-btn span {
+    font-size: 12px;
 }
 
 .toolbar-separator {
     width: 1px;
     height: 20px;
     background: var(--adobe-border);
-    margin: 0 4px;
-}
-
-.header-right {
-    display: flex;
-    align-items: center;
-    gap: 8px;
+    margin: 0 6px;
 }
 
 .icon-btn {
-    width: 32px;
-    height: 32px;
+    width: 28px;
+    height: 28px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -166,6 +204,11 @@ body {
 .icon-btn:hover {
     background: var(--adobe-hover);
     color: var(--text-primary);
+}
+
+.icon-btn svg {
+    width: 16px;
+    height: 16px;
 }
 
 /* Main Container Layout */
@@ -227,20 +270,7 @@ body {
 }
 
 .tools-list {
-    padding: 8px;
-}
-
-.tool-category {
-    margin-bottom: 16px;
-}
-
-.category-title {
-    font-size: 11px;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-    color: var(--text-muted);
-    padding: 8px 12px 4px;
+    padding: 4px;
 }
 
 .tool-item {
@@ -258,7 +288,7 @@ body {
     transition: all var(--transition-fast);
     text-align: left;
     font-family: inherit;
-    margin-bottom: 2px;
+    margin-bottom: 1px;
 }
 
 .tool-item:hover {
@@ -268,6 +298,10 @@ body {
 
 .tool-item.active {
     background: var(--adobe-blue);
+    color: white;
+}
+
+.tool-item.active svg {
     color: white;
 }
 
