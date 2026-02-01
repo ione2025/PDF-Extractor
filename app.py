@@ -616,4 +616,20 @@ def health():
 
 
 if __name__ == '__main__':
-    app.run(debug=True, host='0.0.0.0', port=5000)
+    # Get configuration from environment variables
+    import os
+    debug_mode = os.environ.get('FLASK_DEBUG', 'False').lower() == 'true'
+    port = int(os.environ.get('PORT', 5000))
+    host = os.environ.get('HOST', '0.0.0.0')
+    
+    print("=" * 60)
+    print("PDF Extractor Pro - Web Application")
+    print("=" * 60)
+    print(f"\n🌐 Server starting on http://{host}:{port}")
+    print(f"📊 Debug mode: {debug_mode}")
+    print("\n💡 Access the application by opening the URL in your browser")
+    print("🛑 Press CTRL+C to stop the server")
+    print("=" * 60)
+    print()
+    
+    app.run(debug=debug_mode, host=host, port=port)

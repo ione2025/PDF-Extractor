@@ -1,10 +1,50 @@
 # 🚀 PDF Extractor Pro
 
-**The Most Powerful PDF Tool Ever Created** - A sophisticated desktop and web application for extracting text and images from PDF files with AI-powered analysis, OCR scanning, and automated Excel reporting.
+**The Most Powerful PDF Tool Ever Created** - A sophisticated web application for extracting text and images from PDF files with AI-powered analysis, OCR scanning, and automated Excel reporting.
 
-**NEW**: Adobe Acrobat Pro DC-style interface with Windows executable installer!
+![PDF Extractor Pro](https://github.com/user-attachments/assets/24da9158-c6f0-4033-9065-d994063d12ce)
 
-![PDF Extractor Pro](https://github.com/user-attachments/assets/6a3999fe-142c-43b0-9e3f-ecfb401e8ce1)
+---
+
+## 💻 Quick Start - Run on Your PC
+
+### Simple 4-Step Installation:
+
+1. **Install Python 3.11+** from https://www.python.org/downloads/
+2. **Download this repository** (Code → Download ZIP)
+3. **Install dependencies:**
+   ```bash
+   pip install -r requirements.txt
+   ```
+4. **Run the application:**
+   ```bash
+   python app.py
+   ```
+
+Then open your browser to **http://localhost:5000** 🎉
+
+### 📖 Need detailed instructions?
+
+**→ [Click here for complete installation guide](INSTALL_LOCAL.md)**
+
+Includes:
+- Step-by-step instructions for Windows, Mac, and Linux
+- System requirements (Tesseract, Poppler)
+- Troubleshooting common issues
+- Configuration options
+
+---
+
+## 🌐 Alternative: Deploy to Cloud (Optional)
+
+Don't want to install locally? Deploy to free hosting:
+
+[![Deploy to Render](https://render.com/images/deploy-to-render-button.svg)](https://render.com/deploy?repo=https://github.com/ione2025/PDF-Extractor)
+[![Deploy on Railway](https://railway.app/button.svg)](https://railway.app/template/6JwSne?referralCode=alphasec)
+
+**📖 See [DEPLOY_LIVE.md](DEPLOY_LIVE.md) for cloud deployment guide**
+
+---
 
 ## ✨ Features
 
