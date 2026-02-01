@@ -69,8 +69,9 @@ Don't want to install locally? Deploy to free hosting:
 
 ### 🖼️ AI-Powered Image Analysis
 - **Ultra-HD Extraction**: 300-400 DPI image quality using PyMuPDF with 4x zoom matrix
+- **Advanced OCR for Embedded Text**: Multi-language OCR extracts SKUs and text directly from within images
 - **Google Gemini AI Integration**: Advanced image analysis using Gemini 1.5 Flash
-  - Automatic SKU detection
+  - Automatic SKU detection (enhanced with OCR for embedded SKUs)
   - Product category classification (Gate, Door, Fence, Handrail, Window Protection)
   - Detailed product descriptions
   - SVG path generation for 3D modeling

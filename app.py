@@ -203,16 +203,43 @@ def extract_images_from_pdf(pdf_path, output_base_folder, task_id=None):
         raise Exception(f"Image extraction failed: {str(e)}")
 
 
+def extract_text_from_image_ocr(image_path):
+    """
+    Extract text from image using OCR (Optical Character Recognition).
+    This helps extract SKUs and other text embedded within product images.
+    Returns the extracted text string.
+    """
+    try:
+        # Open image
+        image = Image.open(image_path)
+        
+        # Perform OCR with multi-language support
+        # Use the same language configuration as PDF OCR
+        extracted_text = pytesseract.image_to_string(image, lang=TESSERACT_LANGUAGES)
+        
+        return extracted_text.strip()
+        
+    except Exception as e:
+        print(f"OCR extraction failed: {str(e)}")
+        return ""
+
+
 def analyze_image_with_gemini(image_path):
     """
     Analyze image using Gemini 1.5 Flash API to extract:
-    - SKU number
+    - SKU number (using both OCR and AI vision)
     - Product category
     - Product description
     - SVG path for silhouette
     - Primary and secondary colors
+    
+    Enhanced with OCR to reliably extract SKUs embedded in images.
     """
     try:
+        # First, extract text from image using OCR
+        # This is crucial for SKUs embedded within the image itself
+        ocr_text = extract_text_from_image_ocr(image_path)
+        
         # Initialize Gemini model
         model = genai.GenerativeModel('gemini-1.5-flash')
         
@@ -226,25 +253,35 @@ def analyze_image_with_gemini(image_path):
             'data': image_data
         }]
         
-        # Craft the prompt
-        prompt = """Analyze this product image and provide the following information in JSON format:
+        # Enhanced prompt that includes OCR text
+        prompt = f"""Analyze this product image and provide the following information in JSON format:
 
-1. "sku": The SKU number printed inside this image. If no SKU is found, return "Unknown".
-2. "category": Determine the product category from [Gate, Door, Fence, Handrail, Window Protection]. If unclear, return "Unknown".
+OCR EXTRACTED TEXT FROM IMAGE:
+{ocr_text if ocr_text else "No text detected"}
+
+IMPORTANT: The SKU code is embedded as text WITHIN this image. Use the OCR extracted text above to find the SKU.
+
+1. "sku": Extract the SKU number from the OCR text above or from visual inspection of the image. Look for alphanumeric codes, model numbers, or product codes. Common patterns include: letters followed by numbers (e.g., "ABC123", "SKU-456", "MODEL789"). If no SKU is found in either the OCR text or the image, return "Unknown".
+
+2. "category": Determine the product category from [Gate, Door, Fence, Handrail, Window Protection] based on the visual appearance of the product. If unclear, return "Unknown".
+
 3. "description": Provide a brief product description (1-2 sentences) describing what the product is, its features, or purpose. If no clear description can be determined, return "No description available".
+
 4. "svg_path": Generate a clean SVG path string that represents the product's silhouette for 3D extrusion. This should be a simplified outline of the main product shape.
+
 5. "primary_color": The primary hex color of the product (e.g., "#000000").
+
 6. "secondary_color": The secondary hex color of the product (e.g., "#FFFFFF").
 
 Return ONLY a valid JSON object with these exact keys. Example:
-{
+{{
     "sku": "ABC123",
     "category": "Gate",
     "description": "Modern sliding gate with decorative panels and reinforced frame",
     "svg_path": "M 10,10 L 100,10 L 100,100 L 10,100 Z",
     "primary_color": "#2C3E50",
     "secondary_color": "#ECF0F1"
-}"""
+}}"""
         
         # Send request to Gemini
         response = model.generate_content([prompt, image_parts[0]])
@@ -261,6 +298,9 @@ Return ONLY a valid JSON object with these exact keys. Example:
         
         analysis = json.loads(response_text)
         
+        # Store OCR text in analysis for debugging
+        analysis['ocr_text'] = ocr_text
+        
         return analysis
         
     except Exception as e:
@@ -272,6 +312,7 @@ Return ONLY a valid JSON object with these exact keys. Example:
             'svg_path': '',
             'primary_color': '#000000',
             'secondary_color': '#FFFFFF',
+            'ocr_text': '',
             'error': str(e)
         }
 
