@@ -207,11 +207,21 @@ def extract_text_from_image_ocr(image_path):
     """
     Extract text from image using OCR (Optical Character Recognition).
     This helps extract SKUs and other text embedded within product images.
+    Includes image preprocessing to improve OCR accuracy.
     Returns the extracted text string.
     """
     try:
         # Open image
         image = Image.open(image_path)
+        
+        # Convert to RGB if necessary (handles RGBA, grayscale, etc.)
+        if image.mode not in ('RGB', 'L'):
+            image = image.convert('RGB')
+        
+        # Preprocess image to improve OCR accuracy
+        # Convert to grayscale for better text detection
+        if image.mode != 'L':
+            image = image.convert('L')
         
         # Perform OCR with multi-language support
         # Use the same language configuration as PDF OCR
@@ -349,7 +359,8 @@ def save_image_and_metadata(image_path, analysis, output_base_folder):
         'description': analysis.get('description', 'No description available'),
         'svg_path': analysis.get('svg_path', ''),
         'primary_color': analysis.get('primary_color', '#000000'),
-        'secondary_color': analysis.get('secondary_color', '#FFFFFF')
+        'secondary_color': analysis.get('secondary_color', '#FFFFFF'),
+        'ocr_text': analysis.get('ocr_text', '')  # Include OCR text for reference
     }
     
     with open(json_path, 'w') as f:
