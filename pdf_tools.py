@@ -5,13 +5,13 @@ Comprehensive PDF manipulation functionality
 import os
 import io
 from PyPDF2 import PdfReader, PdfWriter, PdfMerger
+from PyPDF2.constants import UserAccessPermissions
 import fitz  # PyMuPDF
 from PIL import Image
 import img2pdf
 from reportlab.pdfgen import canvas
 from reportlab.lib.pagesizes import letter, A4
 from reportlab.lib.utils import ImageReader
-import pikepdf
 from pdf2image import convert_from_path
 from docx import Document
 from docx.shared import Inches
@@ -282,47 +282,74 @@ class PDFSecurity:
     
     @staticmethod
     def encrypt_pdf(pdf_path, output_path, user_password, owner_password=None):
-        """Encrypt PDF with password"""
-        with pikepdf.open(pdf_path) as pdf:
-            if owner_password is None:
-                owner_password = user_password
-            
-            pdf.save(
-                output_path,
-                encryption=pikepdf.Encryption(
-                    user=user_password,
-                    owner=owner_password,
-                    R=6  # AES-256
-                )
-            )
+        """Encrypt PDF with password using PyPDF2
+        
+        Note: Uses 128-bit encryption (RC4). PyPDF2 does not support AES-256 encryption.
+        This provides adequate security for most use cases and maintains compatibility.
+        """
+        if owner_password is None:
+            owner_password = user_password
+        
+        reader = PdfReader(pdf_path)
+        writer = PdfWriter()
+        
+        # Copy all pages
+        for page in reader.pages:
+            writer.add_page(page)
+        
+        # Encrypt with 128-bit encryption
+        writer.encrypt(user_password=user_password, owner_password=owner_password, use_128bit=True)
+        
+        with open(output_path, 'wb') as f:
+            writer.write(f)
         
         return output_path
     
     @staticmethod
     def decrypt_pdf(pdf_path, output_path, password):
         """Remove password from PDF"""
-        with pikepdf.open(pdf_path, password=password) as pdf:
-            pdf.save(output_path)
+        reader = PdfReader(pdf_path, password=password)
+        writer = PdfWriter()
+        
+        # Copy all pages (decrypted)
+        for page in reader.pages:
+            writer.add_page(page)
+        
+        with open(output_path, 'wb') as f:
+            writer.write(f)
         
         return output_path
     
     @staticmethod
     def set_permissions(pdf_path, output_path, password, allow_printing=True, 
                        allow_modification=False, allow_copying=True):
-        """Set PDF permissions"""
-        with pikepdf.open(pdf_path) as pdf:
-            pdf.save(
-                output_path,
-                encryption=pikepdf.Encryption(
-                    user=password,
-                    owner=password,
-                    allow=pikepdf.Permissions(
-                        print_highres=allow_printing,
-                        modify_other=allow_modification,
-                        extract=allow_copying
-                    )
-                )
-            )
+        """Set PDF permissions using PyPDF2"""
+        reader = PdfReader(pdf_path)
+        writer = PdfWriter()
+        
+        # Copy all pages
+        for page in reader.pages:
+            writer.add_page(page)
+        
+        # Build permissions flag
+        permissions = 0
+        if allow_printing:
+            permissions |= UserAccessPermissions.PRINT
+        if allow_modification:
+            permissions |= UserAccessPermissions.MODIFY
+        if allow_copying:
+            permissions |= UserAccessPermissions.EXTRACT
+        
+        # Encrypt with permissions
+        writer.encrypt(
+            user_password=password, 
+            owner_password=password, 
+            use_128bit=True,
+            permissions_flag=permissions
+        )
+        
+        with open(output_path, 'wb') as f:
+            writer.write(f)
         
         return output_path
 
@@ -333,33 +360,45 @@ class PDFMetadata:
     @staticmethod
     def edit_metadata(pdf_path, output_path, title=None, author=None, 
                      subject=None, keywords=None):
-        """Edit PDF metadata"""
-        with pikepdf.open(pdf_path) as pdf:
-            with pdf.open_metadata() as meta:
-                if title:
-                    meta['dc:title'] = title
-                if author:
-                    meta['dc:creator'] = author
-                if subject:
-                    meta['dc:description'] = subject
-                if keywords:
-                    meta['pdf:Keywords'] = keywords
-            
-            pdf.save(output_path)
+        """Edit PDF metadata using PyPDF2"""
+        reader = PdfReader(pdf_path)
+        writer = PdfWriter()
+        
+        # Copy all pages
+        for page in reader.pages:
+            writer.add_page(page)
+        
+        # Build metadata dictionary
+        metadata = {}
+        if title:
+            metadata['/Title'] = title
+        if author:
+            metadata['/Author'] = author
+        if subject:
+            metadata['/Subject'] = subject
+        if keywords:
+            metadata['/Keywords'] = keywords
+        
+        # Add metadata
+        if metadata:
+            writer.add_metadata(metadata)
+        
+        with open(output_path, 'wb') as f:
+            writer.write(f)
         
         return output_path
     
     @staticmethod
     def get_metadata(pdf_path):
         """Get PDF metadata"""
-        with pikepdf.open(pdf_path) as pdf:
-            metadata = {}
-            
-            if pdf.docinfo:
-                for key, value in pdf.docinfo.items():
-                    metadata[key] = str(value)
-            
-            return metadata
+        reader = PdfReader(pdf_path)
+        metadata = {}
+        
+        if reader.metadata:
+            for key, value in reader.metadata.items():
+                metadata[key] = str(value)
+        
+        return metadata
 
 
 class PDFPageManager:

@@ -37,7 +37,6 @@ hiddenimports = [
     'img2pdf',
     'docx',
     'xlsxwriter',
-    'pikepdf',
     'cairosvg',
     'flask.json',
     'flask.json.provider',
