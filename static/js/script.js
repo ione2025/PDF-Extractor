@@ -49,80 +49,70 @@ document.addEventListener('DOMContentLoaded', function() {
     let currentTaskId = null;
     let excelFileName = null;
 
+    // Helper function to update tool state
+    function updateToolState(toolType) {
+        // Update sidebar active state
+        sidebarTools.forEach(t => t.classList.remove('active'));
+        const toolElement = document.querySelector(`[data-tool="${toolType}"]`);
+        if (toolElement) toolElement.classList.add('active');
+        
+        // Update mode and show/hide appropriate options
+        if (toolType === 'text-extract') {
+            currentMode = 'text';
+            textOptions.style.display = 'block';
+            imageOptions.style.display = 'none';
+        } else if (toolType === 'image-extract') {
+            currentMode = 'image';
+            textOptions.style.display = 'none';
+            imageOptions.style.display = 'block';
+        } else if (toolType === 'metadata') {
+            currentMode = 'metadata';
+            textOptions.style.display = 'none';
+            imageOptions.style.display = 'none';
+        }
+    }
+
     // Sidebar tool switching
     sidebarTools.forEach(tool => {
         tool.addEventListener('click', function() {
-            // Update active tool
-            sidebarTools.forEach(t => t.classList.remove('active'));
-            this.classList.add('active');
-            
-            // Get selected tool
             const toolType = this.dataset.tool;
-            
-            // Show/hide appropriate options
-            if (toolType === 'text-extract') {
-                currentMode = 'text';
-                textOptions.style.display = 'block';
-                imageOptions.style.display = 'none';
-            } else if (toolType === 'image-extract') {
-                currentMode = 'image';
-                textOptions.style.display = 'none';
-                imageOptions.style.display = 'block';
-            } else if (toolType === 'metadata') {
-                currentMode = 'metadata';
-                textOptions.style.display = 'none';
-                imageOptions.style.display = 'none';
-            }
-            
-            // Hide results
+            updateToolState(toolType);
             hideAllResults();
         });
     });
 
     // Open file button - triggers file selection
+    function openFileHandler() {
+        fileInput.click();
+    }
+    
     if (openFileBtn) {
-        openFileBtn.addEventListener('click', function() {
-            fileInput.click();
-        });
+        openFileBtn.addEventListener('click', openFileHandler);
     }
 
     // Quick open button - triggers file selection
     if (quickOpenBtn) {
-        quickOpenBtn.addEventListener('click', function() {
-            fileInput.click();
-        });
+        quickOpenBtn.addEventListener('click', openFileHandler);
+    }
+
+    // Extract button handler
+    function extractWithMode(toolType) {
+        updateToolState(toolType);
+        fileInput.click();
     }
 
     // Extract text button - triggers file selection with text mode
     if (extractTextBtn) {
-        extractTextBtn.addEventListener('click', function() {
-            currentMode = 'text';
-            // Update sidebar to show text tool as active
-            sidebarTools.forEach(t => t.classList.remove('active'));
-            const textTool = document.querySelector('[data-tool="text-extract"]');
-            if (textTool) textTool.classList.add('active');
-            textOptions.style.display = 'block';
-            imageOptions.style.display = 'none';
-            fileInput.click();
-        });
+        extractTextBtn.addEventListener('click', () => extractWithMode('text-extract'));
     }
 
     // Extract images button - triggers file selection with image mode
     if (extractImagesBtn) {
-        extractImagesBtn.addEventListener('click', function() {
-            currentMode = 'image';
-            // Update sidebar to show image tool as active
-            sidebarTools.forEach(t => t.classList.remove('active'));
-            const imageTool = document.querySelector('[data-tool="image-extract"]');
-            if (imageTool) imageTool.classList.add('active');
-            textOptions.style.display = 'none';
-            imageOptions.style.display = 'block';
-            fileInput.click();
-        });
+        extractImagesBtn.addEventListener('click', () => extractWithMode('image-extract'));
     }
 
     // Handle file selection - automatically submit when file is chosen
-    fileInput.addEventListener('change', function() {
+    fileInput.addEventListener('change', async function() {
         if (this.files && this.files.length > 0) {
             // Show work area
             const welcomeScreen = document.getElementById('welcome-screen');
@@ -130,14 +120,13 @@ document.addEventListener('DOMContentLoaded', function() {
             if (welcomeScreen) welcomeScreen.style.display = 'none';
             if (workArea) workArea.style.display = 'block';
             
-            // Auto-submit the form
-            uploadForm.dispatchEvent(new Event('submit'));
+            // Auto-submit the form by calling the handler directly
+            await handleFormSubmit();
         }
     });
 
     // Handle form submission
-    uploadForm.addEventListener('submit', async function(e) {
-        e.preventDefault();
+    async function handleFormSubmit() {
 
         const file = fileInput.files[0];
         if (!file) {
@@ -226,7 +215,7 @@ document.addEventListener('DOMContentLoaded', function() {
             hideLoading();
             hideProgress();
         }
-    });
+    }
 
     // Progress polling
     function startProgressPolling(taskId) {
