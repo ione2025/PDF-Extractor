@@ -325,7 +325,7 @@ Return ONLY a valid JSON object with these exact keys. Example:
 
 def save_image_and_metadata(image_path, analysis, output_base_folder):
     """
-    Save extracted image as WebP and create JSON metadata file.
+    Save extracted image as high-quality JPG and create JSON metadata file.
     Organize into category folders.
     """
     sku = analysis.get('sku', 'Unknown')
@@ -342,10 +342,23 @@ def save_image_and_metadata(image_path, analysis, output_base_folder):
     # Generate safe filename
     safe_sku = secure_filename(sku)
     
-    # Save image as WebP
+    # Save image as high-quality JPG
     image = Image.open(image_path)
-    webp_path = os.path.join(category_folder, f'{safe_sku}.webp')
-    image.save(webp_path, 'WEBP', quality=95)
+    
+    # Convert RGBA to RGB if necessary (JPG doesn't support transparency)
+    if image.mode in ('RGBA', 'LA', 'P'):
+        # Create a white background
+        rgb_image = Image.new('RGB', image.size, (255, 255, 255))
+        if image.mode == 'P':
+            image = image.convert('RGBA')
+        rgb_image.paste(image, mask=image.split()[-1] if image.mode in ('RGBA', 'LA') else None)
+        image = rgb_image
+    elif image.mode != 'RGB':
+        image = image.convert('RGB')
+    
+    jpg_path = os.path.join(category_folder, f'{safe_sku}.jpg')
+    # Save with maximum quality (100) and no subsampling for best quality
+    image.save(jpg_path, 'JPEG', quality=100, subsampling=0, optimize=False)
     
     # Save JSON metadata
     json_path = os.path.join(category_folder, f'{safe_sku}.json')
@@ -366,7 +379,7 @@ def save_image_and_metadata(image_path, analysis, output_base_folder):
         'sku': sku,
         'category': category,
         'description': analysis.get('description', 'No description available'),
-        'webp_path': webp_path,
+        'image_path': jpg_path,
         'json_path': json_path
     }
 

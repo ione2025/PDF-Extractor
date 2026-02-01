@@ -77,7 +77,7 @@ Don't want to install locally? Deploy to free hosting:
   - SVG path generation for 3D modeling
   - Primary and secondary color extraction (hex codes)
 - **Smart Organization**: Automatic folder structure by product category
-- **WebP Compression**: High-quality images with optimized file sizes
+- **Maximum Quality JPG**: Images saved in JPG format with 100% quality and no subsampling
 - **JSON Metadata**: Complete product data for each extracted image
 - **Excel Export**: Comprehensive SKU report with descriptions and colors
 
@@ -226,10 +226,10 @@ output/
 └── [PDF_NAME]/
     ├── [PDF_NAME]_SKU_Report.xlsx     # Excel report
     ├── Gate/
-    │   ├── SKU123.webp
+    │   ├── SKU123.jpg
     │   └── SKU123.json
     ├── Door/
-    │   ├── SKU456.webp
+    │   ├── SKU456.jpg
     │   └── SKU456.json
     ├── Fence/
     ├── Handrail/
