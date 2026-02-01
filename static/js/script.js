@@ -2,8 +2,6 @@ document.addEventListener('DOMContentLoaded', function() {
     // Elements
     const uploadForm = document.getElementById('upload-form');
     const fileInput = document.getElementById('pdf-file');
-    const fileLabel = document.querySelector('.file-label .file-text');
-    const extractBtn = document.getElementById('extract-btn');
     const loading = document.getElementById('loading');
     const loadingText = document.getElementById('loading-text');
     const errorMessage = document.getElementById('error-message');
@@ -16,10 +14,16 @@ document.addEventListener('DOMContentLoaded', function() {
     const progressDetails = document.getElementById('progress-details');
     const progressEta = document.getElementById('progress-eta');
     
-    // Mode tabs
-    const modeTabs = document.querySelectorAll('.mode-tab');
+    // Toolbar buttons
+    const openFileBtn = document.getElementById('open-file-btn');
+    const extractTextBtn = document.getElementById('extract-text-btn');
+    const extractImagesBtn = document.getElementById('extract-images-btn');
+    const quickOpenBtn = document.getElementById('quick-open-btn');
+    
+    // Sidebar buttons
     const textOptions = document.getElementById('text-options');
     const imageOptions = document.getElementById('image-options');
+    const sidebarTools = document.querySelectorAll('.tool-item');
     
     // Results sections
     const textResultsSection = document.getElementById('text-results-section');
@@ -45,25 +49,29 @@ document.addEventListener('DOMContentLoaded', function() {
     let currentTaskId = null;
     let excelFileName = null;
 
-    // Mode switching
-    modeTabs.forEach(tab => {
-        tab.addEventListener('click', function() {
-            // Update active tab
-            modeTabs.forEach(t => t.classList.remove('active'));
+    // Sidebar tool switching
+    sidebarTools.forEach(tool => {
+        tool.addEventListener('click', function() {
+            // Update active tool
+            sidebarTools.forEach(t => t.classList.remove('active'));
             this.classList.add('active');
             
-            // Get selected mode
-            currentMode = this.dataset.mode;
+            // Get selected tool
+            const toolType = this.dataset.tool;
             
             // Show/hide appropriate options
-            if (currentMode === 'text') {
+            if (toolType === 'text-extract') {
+                currentMode = 'text';
                 textOptions.style.display = 'block';
                 imageOptions.style.display = 'none';
-                extractBtn.querySelector('.btn-text').textContent = 'Extract Text';
-            } else {
+            } else if (toolType === 'image-extract') {
+                currentMode = 'image';
                 textOptions.style.display = 'none';
                 imageOptions.style.display = 'block';
-                extractBtn.querySelector('.btn-text').textContent = 'Extract & Analyze';
+            } else if (toolType === 'metadata') {
+                currentMode = 'metadata';
+                textOptions.style.display = 'none';
+                imageOptions.style.display = 'none';
             }
             
             // Hide results
@@ -71,12 +79,59 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 
-    // Update file label when file is selected
+    // Open file button - triggers file selection
+    if (openFileBtn) {
+        openFileBtn.addEventListener('click', function() {
+            fileInput.click();
+        });
+    }
+
+    // Quick open button - triggers file selection
+    if (quickOpenBtn) {
+        quickOpenBtn.addEventListener('click', function() {
+            fileInput.click();
+        });
+    }
+
+    // Extract text button - triggers file selection with text mode
+    if (extractTextBtn) {
+        extractTextBtn.addEventListener('click', function() {
+            currentMode = 'text';
+            // Update sidebar to show text tool as active
+            sidebarTools.forEach(t => t.classList.remove('active'));
+            const textTool = document.querySelector('[data-tool="text-extract"]');
+            if (textTool) textTool.classList.add('active');
+            textOptions.style.display = 'block';
+            imageOptions.style.display = 'none';
+            fileInput.click();
+        });
+    }
+
+    // Extract images button - triggers file selection with image mode
+    if (extractImagesBtn) {
+        extractImagesBtn.addEventListener('click', function() {
+            currentMode = 'image';
+            // Update sidebar to show image tool as active
+            sidebarTools.forEach(t => t.classList.remove('active'));
+            const imageTool = document.querySelector('[data-tool="image-extract"]');
+            if (imageTool) imageTool.classList.add('active');
+            textOptions.style.display = 'none';
+            imageOptions.style.display = 'block';
+            fileInput.click();
+        });
+    }
+
+    // Handle file selection - automatically submit when file is chosen
     fileInput.addEventListener('change', function() {
         if (this.files && this.files.length > 0) {
-            fileLabel.textContent = this.files[0].name;
-        } else {
-            fileLabel.textContent = 'Choose PDF File';
+            // Show work area
+            const welcomeScreen = document.getElementById('welcome-screen');
+            const workArea = document.getElementById('work-area');
+            if (welcomeScreen) welcomeScreen.style.display = 'none';
+            if (workArea) workArea.style.display = 'block';
+            
+            // Auto-submit the form
+            uploadForm.dispatchEvent(new Event('submit'));
         }
     });
 
@@ -108,7 +163,6 @@ document.addEventListener('DOMContentLoaded', function() {
             loadingText.textContent = 'Starting AI analysis... This may take several minutes.';
         }
         showLoading();
-        extractBtn.disabled = true;
 
         // Prepare form data
         const formData = new FormData();
@@ -171,7 +225,6 @@ document.addEventListener('DOMContentLoaded', function() {
         } finally {
             hideLoading();
             hideProgress();
-            extractBtn.disabled = false;
         }
     });
 
