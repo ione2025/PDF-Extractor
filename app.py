@@ -203,16 +203,49 @@ def extract_images_from_pdf(pdf_path, output_base_folder, task_id=None):
         raise Exception(f"Image extraction failed: {str(e)}")
 
 
+def extract_text_from_image_ocr(image_path):
+    """
+    Extract text from image using OCR (Optical Character Recognition).
+    This helps extract SKUs and other text embedded within product images.
+    Includes image preprocessing to improve OCR accuracy.
+    Returns the extracted text string.
+    """
+    try:
+        # Open image
+        image = Image.open(image_path)
+        
+        # Convert to grayscale for better text detection
+        # Grayscale images typically provide better OCR accuracy
+        if image.mode != 'L':
+            image = image.convert('L')
+        
+        # Perform OCR with multi-language support
+        # Use the same language configuration as PDF OCR
+        extracted_text = pytesseract.image_to_string(image, lang=TESSERACT_LANGUAGES)
+        
+        return extracted_text.strip()
+        
+    except Exception as e:
+        print(f"OCR extraction failed: {str(e)}")
+        return ""
+
+
 def analyze_image_with_gemini(image_path):
     """
     Analyze image using Gemini 1.5 Flash API to extract:
-    - SKU number
+    - SKU number (using both OCR and AI vision)
     - Product category
     - Product description
     - SVG path for silhouette
     - Primary and secondary colors
+    
+    Enhanced with OCR to reliably extract SKUs embedded in images.
     """
     try:
+        # First, extract text from image using OCR
+        # This is crucial for SKUs embedded within the image itself
+        ocr_text = extract_text_from_image_ocr(image_path)
+        
         # Initialize Gemini model
         model = genai.GenerativeModel('gemini-1.5-flash')
         
@@ -226,25 +259,42 @@ def analyze_image_with_gemini(image_path):
             'data': image_data
         }]
         
-        # Craft the prompt
-        prompt = """Analyze this product image and provide the following information in JSON format:
+        # Sanitize OCR text for security (limit length and remove potentially harmful content)
+        if ocr_text:
+            # Limit OCR text to 1000 characters to prevent prompt injection
+            ocr_text = ocr_text[:1000]
+            # Remove any markdown code blocks or special formatting that could confuse the AI
+            ocr_text = ocr_text.replace('```', '').replace('`', '')
+        
+        # Enhanced prompt that includes OCR text
+        prompt = f"""Analyze this product image and provide the following information in JSON format:
 
-1. "sku": The SKU number printed inside this image. If no SKU is found, return "Unknown".
-2. "category": Determine the product category from [Gate, Door, Fence, Handrail, Window Protection]. If unclear, return "Unknown".
+OCR EXTRACTED TEXT FROM IMAGE:
+{ocr_text if ocr_text else "No text detected"}
+
+IMPORTANT: The SKU code is embedded as text WITHIN this image. Use the OCR extracted text above to find the SKU.
+
+1. "sku": Extract the SKU number from the OCR text above or from visual inspection of the image. Look for alphanumeric codes, model numbers, or product codes. Common patterns include: letters followed by numbers (e.g., "ABC123", "SKU-456", "MODEL789"). If no SKU is found in either the OCR text or the image, return "Unknown".
+
+2. "category": Determine the product category from [Gate, Door, Fence, Handrail, Window Protection] based on the visual appearance of the product. If unclear, return "Unknown".
+
 3. "description": Provide a brief product description (1-2 sentences) describing what the product is, its features, or purpose. If no clear description can be determined, return "No description available".
+
 4. "svg_path": Generate a clean SVG path string that represents the product's silhouette for 3D extrusion. This should be a simplified outline of the main product shape.
+
 5. "primary_color": The primary hex color of the product (e.g., "#000000").
+
 6. "secondary_color": The secondary hex color of the product (e.g., "#FFFFFF").
 
 Return ONLY a valid JSON object with these exact keys. Example:
-{
+{{
     "sku": "ABC123",
     "category": "Gate",
     "description": "Modern sliding gate with decorative panels and reinforced frame",
     "svg_path": "M 10,10 L 100,10 L 100,100 L 10,100 Z",
     "primary_color": "#2C3E50",
     "secondary_color": "#ECF0F1"
-}"""
+}}"""
         
         # Send request to Gemini
         response = model.generate_content([prompt, image_parts[0]])
@@ -261,6 +311,9 @@ Return ONLY a valid JSON object with these exact keys. Example:
         
         analysis = json.loads(response_text)
         
+        # Store OCR text in analysis for debugging
+        analysis['ocr_text'] = ocr_text
+        
         return analysis
         
     except Exception as e:
@@ -272,13 +325,14 @@ Return ONLY a valid JSON object with these exact keys. Example:
             'svg_path': '',
             'primary_color': '#000000',
             'secondary_color': '#FFFFFF',
+            'ocr_text': '',
             'error': str(e)
         }
 
 
 def save_image_and_metadata(image_path, analysis, output_base_folder):
     """
-    Save extracted image as WebP and create JSON metadata file.
+    Save extracted image as high-quality JPG and create JSON metadata file.
     Organize into category folders.
     """
     sku = analysis.get('sku', 'Unknown')
@@ -295,10 +349,35 @@ def save_image_and_metadata(image_path, analysis, output_base_folder):
     # Generate safe filename
     safe_sku = secure_filename(sku)
     
-    # Save image as WebP
+    # Save image as high-quality JPG
     image = Image.open(image_path)
-    webp_path = os.path.join(category_folder, f'{safe_sku}.webp')
-    image.save(webp_path, 'WEBP', quality=95)
+    
+    # Convert to RGB if necessary (JPG doesn't support transparency or other modes)
+    if image.mode == 'RGBA':
+        # Handle RGBA: Create white background and paste with alpha mask
+        rgb_image = Image.new('RGB', image.size, (255, 255, 255))
+        rgb_image.paste(image, mask=image.split()[3])  # Use alpha channel as mask
+        image = rgb_image
+    elif image.mode == 'LA':
+        # Handle LA (grayscale with alpha): Create white background and paste with alpha mask
+        rgb_image = Image.new('RGB', image.size, (255, 255, 255))
+        # Convert LA to RGBA first to properly handle the alpha channel
+        rgba_image = image.convert('RGBA')
+        rgb_image.paste(rgba_image, mask=rgba_image.split()[3])
+        image = rgb_image
+    elif image.mode == 'P':
+        # Handle palette mode: Convert to RGBA first to preserve transparency if present
+        image = image.convert('RGBA')
+        rgb_image = Image.new('RGB', image.size, (255, 255, 255))
+        rgb_image.paste(image, mask=image.split()[3])
+        image = rgb_image
+    elif image.mode != 'RGB':
+        # Handle any other mode: direct conversion to RGB
+        image = image.convert('RGB')
+    
+    jpg_path = os.path.join(category_folder, f'{safe_sku}.jpg')
+    # Save with maximum quality (100) and no subsampling for best quality
+    image.save(jpg_path, 'JPEG', quality=100, subsampling=0, optimize=False)
     
     # Save JSON metadata
     json_path = os.path.join(category_folder, f'{safe_sku}.json')
@@ -308,7 +387,8 @@ def save_image_and_metadata(image_path, analysis, output_base_folder):
         'description': analysis.get('description', 'No description available'),
         'svg_path': analysis.get('svg_path', ''),
         'primary_color': analysis.get('primary_color', '#000000'),
-        'secondary_color': analysis.get('secondary_color', '#FFFFFF')
+        'secondary_color': analysis.get('secondary_color', '#FFFFFF'),
+        'ocr_text': analysis.get('ocr_text', '')  # Include OCR text for reference
     }
     
     with open(json_path, 'w') as f:
@@ -318,7 +398,7 @@ def save_image_and_metadata(image_path, analysis, output_base_folder):
         'sku': sku,
         'category': category,
         'description': analysis.get('description', 'No description available'),
-        'webp_path': webp_path,
+        'image_path': jpg_path,
         'json_path': json_path
     }
 
