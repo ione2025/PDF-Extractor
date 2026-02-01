@@ -214,12 +214,8 @@ def extract_text_from_image_ocr(image_path):
         # Open image
         image = Image.open(image_path)
         
-        # Convert to RGB if necessary (handles RGBA, grayscale, etc.)
-        if image.mode not in ('RGB', 'L'):
-            image = image.convert('RGB')
-        
-        # Preprocess image to improve OCR accuracy
         # Convert to grayscale for better text detection
+        # Grayscale images typically provide better OCR accuracy
         if image.mode != 'L':
             image = image.convert('L')
         
