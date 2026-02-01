@@ -5,13 +5,13 @@ Comprehensive PDF manipulation functionality
 import os
 import io
 from PyPDF2 import PdfReader, PdfWriter, PdfMerger
+from PyPDF2.constants import UserAccessPermissions
 import fitz  # PyMuPDF
 from PIL import Image
 import img2pdf
 from reportlab.pdfgen import canvas
 from reportlab.lib.pagesizes import letter, A4
 from reportlab.lib.utils import ImageReader
-
 from pdf2image import convert_from_path
 from docx import Document
 from docx.shared import Inches
@@ -282,7 +282,11 @@ class PDFSecurity:
     
     @staticmethod
     def encrypt_pdf(pdf_path, output_path, user_password, owner_password=None):
-        """Encrypt PDF with password using PyPDF2"""
+        """Encrypt PDF with password using PyPDF2
+        
+        Note: Uses 128-bit encryption (RC4). PyPDF2 does not support AES-256 encryption.
+        This provides adequate security for most use cases and maintains compatibility.
+        """
         if owner_password is None:
             owner_password = user_password
         
@@ -320,8 +324,6 @@ class PDFSecurity:
     def set_permissions(pdf_path, output_path, password, allow_printing=True, 
                        allow_modification=False, allow_copying=True):
         """Set PDF permissions using PyPDF2"""
-        from PyPDF2.constants import UserAccessPermissions
-        
         reader = PdfReader(pdf_path)
         writer = PdfWriter()
         
